@@ -1,6 +1,14 @@
 ################################## MSConvert  ##########################################
 
 ############################### MSGF+ ######################################
+##############Uniprot Second run with adenovirus falimy and including Human Papiloma Virus #####################
+java -Xmx12500M -jar MSGFPlus.jar -s J:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\uniprot_Human_Mastadenovirus_human_papiloma_virus_types_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2.mzid -mod J:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
+java -Xms10024m -jar mzidentml-lib.jar FalseDiscoveryRate G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2.mzid G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true
+java -Xms5024m -jar mzidentml-lib.jar Threshold G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr.mzid G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr+th.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold true
+java -Xms5024m -jar mzidentml-lib.jar ProteoGrouper G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr+th.mzid G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
+#java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv C:\Data\HUMAN\mgf\DM_from_raw_uni_trinity+fdr+th+grouping.mzid C:\Data\HUMAN\mgf\DM_from_raw_uni_trinity+fdr+th+grouping_prt_grp.csv -exportType  exportProteinGroups  -compress false
+java -Xms5024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
+java -Xms5024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
 
 ##uniprot and trinity
 java -Xmx8500M -jar MSGFPlus.jar -s C:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\Trinity\trinity_uniprotV2_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\DM_from_raw_trinity_uniprot.mzid -mod C:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
@@ -72,6 +80,24 @@ java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv C:\Data\HUMAN\mgf\DM_from_raw_uni
 java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th.mzid C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
 java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th+grouping.mzid C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
 java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
+
+
+##Cufflinks (genome guided, main-sORFs included)
+java -Xmx10500M -jar MSGFPlus.jar -s J:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\cufflinks\transcripts-ORF_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\cufflinks_PITORF.mzid -mod J:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
+java -Xms5024m -jar mzidentml-lib.jar FalseDiscoveryRate G:\SearchEngine_output\MSGF+\cufflinks_PITORF.mzid G:\SearchEngine_output\MSGF+\cufflinks_PITORF+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true
+java -Xms1024m -jar mzidentml-lib.jar Threshold G:\SearchEngine_output\MSGF+\cufflinks_PITORF+fdr.mzid G:\SearchEngine_output\MSGF+\cufflinks_PITORF+fdr+th.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold true
+java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper G:\SearchEngine_output\MSGF+\cufflinks_PITORF+fdr+th.mzid G:\SearchEngine_output\MSGF+\cufflinks_PITORF+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\cufflinks_PITORF+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\cufflinks_PITORF+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\cufflinks_PITORF+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\cufflinks_PITORF+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
+
+##Cufflinks (genome guided, main ORFs)
+java -Xmx10500M -jar MSGFPlus.jar -s J:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\cufflinks\transcripts_main-ORF_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF.mzid -mod J:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
+java -Xms5024m -jar mzidentml-lib.jar FalseDiscoveryRate G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF.mzid G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true
+java -Xms1024m -jar mzidentml-lib.jar Threshold G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr.mzid G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold true
+java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th.mzid G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
+
 ############################################## X!Tandem ##########################################
 
 ##Ran X!Tandem from SearchGUI on my local machines, parameter files are saved

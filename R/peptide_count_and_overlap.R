@@ -47,6 +47,22 @@ length(unique(UHHPSM[,'Spectrum.ID']))
 length(which(unique(THHPSM[,'Spectrum.ID']) %in% unique(UHHPSM[,'Spectrum.ID'])))
 length(which(unique(THHPSM[,'Sequence']) %in% unique(UHHPSM[,'Sequence'])))
 
+###########Cufflinks#############
+
+#f1="cufflinks_PITORF+fdr+th+grouping.csv"
+f1="cufflinks_main_PITORF+fdr+th+grouping.csv"
+f2="DM_from_raw_uniprot+fdr+th+grouping.csv"
+
+#d1="C:/Users/shyama/Dropbox/results/Human_adenovirus/"
+d2="D:/data/Results/Human-Adeno/Identification/"
+
+##########uniprot only human
+f1="cufflinks_main_PITORF+fdr+th+grouping.csv"
+f2="human_uniprot+fdr+th+grouping.csv"
+
+#d1="C:/Users/shyama/Dropbox/results/Human_adenovirus/"
+d2="D:/data/Results/Human-Adeno/Identification/"
+
 ##################### Bat Hendra ##########################
 filenameBHT="trinity_bat+fdr+th+grouping.csv"
 filenameBHU="uniprot_bat+fdr+th+grouping.csv"
