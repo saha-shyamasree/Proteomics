@@ -158,9 +158,11 @@ length(which(CDSIDs %in% orfIdC))
 DBA_CDSIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=CDSIDs),length))
 DBA_length=unlist(lapply(DBA,length))
 length(unlist(lapply(which(DBA_CDSIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_CDSIDs_length,z=DBA_length)))
+length(unlist(lapply(which(DBA_CDSIDs_length>0),function(x,y,z){if(y[x]!=z[x]){x}},y=DBA_CDSIDs_length,z=DBA_length)))
 
 blasDBnonsense_mediated_decay=blastFilterTranscriptType(blastDB,'nonsense_mediated_decay',22)
 nonsense_mediated_decayIDs=queryIDs(blasDBnonsense_mediated_decay)
+length(nonsense_mediated_decayIDs)
 length(which(nonsense_mediated_decayIDs %in% orfIdA))
 length(which(nonsense_mediated_decayIDs %in% orfIdB))
 length(which(nonsense_mediated_decayIDs %in% orfIdC))
@@ -168,6 +170,7 @@ length(which(nonsense_mediated_decayIDs %in% orfIdC))
 DBA_nonsense_mediated_decayIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=nonsense_mediated_decayIDs),length))
 DBA_length=unlist(lapply(DBA,length))
 length(unlist(lapply(which(DBA_nonsense_mediated_decayIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_nonsense_mediated_decayIDs_length,z=DBA_length)))
+length(unlist(lapply(which(DBA_nonsense_mediated_decayIDs_length>0),function(x,y,z){if(y[x]!=z[x]){x}},y=DBA_nonsense_mediated_decayIDs_length,z=DBA_length)))
 
 blasDBLinc=blastFilterTranscriptType(blastDB,'lincRNA',22)
 lincIDs=queryIDs(blasDBLinc)
@@ -175,6 +178,11 @@ length(lincIDs)
 length(which(lincIDs %in% orfIdA))
 length(which(lincIDs %in% orfIdB))
 length(which(lincIDs %in% orfIdC))
+
+DBA_lincIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=lincIDs),length))
+DBA_length=unlist(lapply(DBA,length))
+length(unlist(lapply(which(DBA_lincIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_lincIDs_length,z=DBA_length)))
+length(unlist(lapply(which(DBA_lincIDs_length>0),function(x,y,z){if(y[x]!=z[x]){x}},y=DBA_lincIDs_length,z=DBA_length)))
 
 grporfnIds=DBA[unlist(lapply(which(DBA_nonsense_mediated_decayIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_nonsense_mediated_decayIDs_length,z=DBA_length))]
 idx=c()
@@ -205,9 +213,6 @@ write.table(Mat1[idx,],file=paste(trD,"nonsense_mediated_decayPrt.tsv",sep=""),s
 write.table(Mat1Pep[idxPep,],file=paste(trD,"nonsense_mediated_decay.tsv",sep=""),sep="\t",quote = FALSE,row.names = FALSE)
 ################################################################################################################################
 
-DBA_lincIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=lincIDs),length))
-DBA_length=unlist(lapply(DBA,length))
-length(unlist(lapply(which(DBA_lincIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_lincIDs_length,z=DBA_length)))
 
 blasDBretained_intron=blastFilterTranscriptType(blastDB,'retained_intron',22)
 retained_intronIDs=queryIDs(blasDBretained_intron)
@@ -219,6 +224,7 @@ length(which(retained_intronIDs %in% orfIdC))
 DBA_retained_intronIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=retained_intronIDs),length))
 DBA_length=unlist(lapply(DBA,length))
 length(unlist(lapply(which(DBA_retained_intronIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_retained_intronIDs_length,z=DBA_length)))
+length(unlist(lapply(which(DBA_retained_intronIDs_length>0),function(x,y,z){if(y[x]!=z[x]){x}},y=DBA_retained_intronIDs_length,z=DBA_length)))
 
 grprorfIds=DBA[unlist(lapply(which(DBA_retained_intronIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_retained_intronIDs_length,z=DBA_length))]
 idx1=c()
@@ -251,6 +257,7 @@ which(DBA_retained_intronIDs_length>0) ###at least one of the transcript ids fro
 
 #Dataset_A_comp2526_c1_seq3_ORF9_Frame_3_300-965_102_112_R_T
 #Dataset_A_comp2526_c1_seq3_ORF9_Frame_3_300-965_159_171_R_R
+
 blasDBantisense=blastFilterTranscriptType(blastDB,'antisense',22)
 antisenseIDs=queryIDs(blasDBantisense)
 length(antisenseIDs)
@@ -260,8 +267,10 @@ length(which(antisenseIDs %in% orfIdC))
 
 DBA_antisenseIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=antisenseIDs),length))
 DBA_length=unlist(lapply(DBA,length))
+##all parents are from the same bio-type
 length(unlist(lapply(which(DBA_antisenseIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_antisenseIDs_length,z=DBA_length)))
-
+##not-all parents are from the same bio-type
+length(unlist(lapply(which(DBA_antisenseIDs_length>0),function(x,y,z){if(y[x]!=z[x]){x}},y=DBA_antisenseIDs_length,z=DBA_length)))
 
 
 blasDBprocessed_transcript=blastFilterTranscriptType(blastDB,'processed_transcript',22)
@@ -271,6 +280,11 @@ length(which(processed_transcriptIDs %in% orfIdA))
 length(which(processed_transcriptIDs %in% orfIdB))
 length(which(processed_transcriptIDs %in% orfIdC))
 
+DBA_processed_transcriptIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=processed_transcriptIDs),length))
+DBA_length=unlist(lapply(DBA,length))
+length(unlist(lapply(which(DBA_processed_transcriptIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_processed_transcriptIDs_length,z=DBA_length)))
+length(unlist(lapply(which(DBA_processed_transcriptIDs_length>0),function(x,y,z){if(y[x]!=z[x]){x}},y=DBA_processed_transcriptIDs_length,z=DBA_length)))
+
 processed_transcriptIdentified=processed_transcriptIDs[which(processed_transcriptIDs %in% orfIdA)]
 processed_transcriptIdentified=c(processed_transcriptIdentified,processed_transcriptIDs[which(processed_transcriptIDs %in% orfIdB)])
 processed_transcriptIdentified=c(processed_transcriptIdentified,processed_transcriptIDs[which(processed_transcriptIDs %in% orfIdC)])
@@ -278,11 +292,9 @@ length(processed_transcriptIdentified)
 length(unique(processed_transcriptIdentified))
 unq_processed_transcriptIdentified=unique(processed_transcriptIdentified)
 
-DBA_processed_transcriptIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=processed_transcriptIDs),length))
-DBA_length=unlist(lapply(DBA,length))
 
 DBA[unlist(lapply(which(DBA_processed_transcriptIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_processed_transcriptIDs_length,z=DBA_length))]##all of the transcript ids from the ORF id matches to a 'processed_transcript'.
-length(unlist(lapply(which(DBA_processed_transcriptIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_processed_transcriptIDs_length,z=DBA_length)))
+
 which(DBA_processed_transcriptIDs_length>0) ###at least one of the transcript ids from the ORF id matches to a 'processed_transcript'.
 
 DBB_processed_transcriptIDs_length = unlist(lapply(lapply(DBB,function(x,y){which(x %in% y)}, y=processed_transcriptIDs),length))
@@ -298,6 +310,10 @@ length(which(Mt_rRNAIDs %in% orfIdA))
 length(which(Mt_rRNAIDs %in% orfIdB))
 length(which(Mt_rRNAIDs %in% orfIdC))
 
+DBA_Mt_rRNAIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=Mt_rRNAIDs),length))
+DBA_length=unlist(lapply(DBA,length))
+length(unlist(lapply(which(DBA_Mt_rRNAIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_Mt_rRNAIDs_length,z=DBA_length)))
+length(unlist(lapply(which(DBA_Mt_rRNAIDs_length>0),function(x,y,z){if(y[x]!=z[x]){x}},y=DBA_Mt_rRNAIDs_length,z=DBA_length)))
 
 blasDBprocessed_pseudogene=blastFilterTranscriptType(blastDB,'processed_pseudogene',22)
 processed_pseudogeneIDs=queryIDs(blasDBprocessed_pseudogene)
@@ -305,6 +321,10 @@ length(processed_pseudogeneIDs)
 length(which(processed_pseudogeneIDs %in% orfIdA))
 length(which(processed_pseudogeneIDs %in% orfIdB))
 length(which(processed_pseudogeneIDs %in% orfIdC))
+
+DBA_processed_pseudogeneIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=processed_pseudogeneIDs),length))
+DBA_length=unlist(lapply(DBA,length))
+length(unlist(lapply(which(DBA_processed_pseudogeneIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_processed_pseudogeneIDs_length,z=DBA_length)))
 
 
 blasDBmisc_RNA=blastFilterTranscriptType(blastDB,'misc_RNA',22)
@@ -314,12 +334,22 @@ length(which(misc_RNAIDs %in% orfIdA))
 length(which(misc_RNAIDs %in% orfIdB))
 length(which(misc_RNAIDs %in% orfIdC))
 
+DBA_misc_RNAIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=misc_RNAIDs),length))
+DBA_length=unlist(lapply(DBA,length))
+length(unlist(lapply(which(DBA_misc_RNAIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_misc_RNAIDs_length,z=DBA_length)))
+
+
 blasDBMt_tRNA=blastFilterTranscriptType(blastDB,'Mt_tRNA',22)
 Mt_tRNAIDs=queryIDs(blasDBMt_tRNA)
 length(Mt_tRNAIDs)
 length(which(Mt_tRNAIDs %in% orfIdA))
 length(which(Mt_tRNAIDs %in% orfIdB))
 length(which(Mt_tRNAIDs %in% orfIdC))
+
+DBA_Mt_tRNAIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=Mt_tRNAIDs),length))
+DBA_length=unlist(lapply(DBA,length))
+length(unlist(lapply(which(DBA_Mt_tRNAIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_Mt_tRNAIDs_length,z=DBA_length)))
+
 
 blasDBtranscribed_unprocessed_pseudogene=blastFilterTranscriptType(blastDB,'transcribed_unprocessed_pseudogene',22)
 transcribed_unprocessed_pseudogeneIDs=queryIDs(blasDBtranscribed_unprocessed_pseudogene)
@@ -328,12 +358,21 @@ length(which(transcribed_unprocessed_pseudogeneIDs %in% orfIdA))
 length(which(transcribed_unprocessed_pseudogeneIDs %in% orfIdB))
 length(which(transcribed_unprocessed_pseudogeneIDs %in% orfIdC))
 
+DBA_transcribed_unprocessed_pseudogeneIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=transcribed_unprocessed_pseudogeneIDs),length))
+DBA_length=unlist(lapply(DBA,length))
+length(unlist(lapply(which(DBA_transcribed_unprocessed_pseudogeneIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_transcribed_unprocessed_pseudogeneIDs_length,z=DBA_length)))
+
+
 blasDBunprocessed_pseudogene=blastFilterTranscriptType(blastDB,'unprocessed_pseudogene',22)
 unprocessed_pseudogeneIDs=queryIDs(blasDBunprocessed_pseudogene)
 length(unprocessed_pseudogeneIDs)
 length(which(unprocessed_pseudogeneIDs %in% orfIdA))
 length(which(unprocessed_pseudogeneIDs %in% orfIdB))
 length(which(unprocessed_pseudogeneIDs %in% orfIdC))
+
+DBA_unprocessed_pseudogeneIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=unprocessed_pseudogeneIDs),length))
+DBA_length=unlist(lapply(DBA,length))
+length(unlist(lapply(which(DBA_unprocessed_pseudogeneIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_unprocessed_pseudogeneIDs_length,z=DBA_length)))
 
 
 blasDBrRNA=blastFilterTranscriptType(blastDB,'rRNA',22)
@@ -342,6 +381,12 @@ length(rRNAIDs)
 length(which(rRNAIDs %in% orfIdA))
 length(which(rRNAIDs %in% orfIdB))
 length(which(rRNAIDs %in% orfIdC))
+
+DBA_rRNAIDs_length = unlist(lapply(lapply(DBA,function(x,y){which(x %in% y)}, y=rRNAIDs),length))
+DBA_length=unlist(lapply(DBA,length))
+length(unlist(lapply(which(DBA_rRNAIDs_length>0),function(x,y,z){if(y[x]==z[x]){x}},y=DBA_rRNAIDs_length,z=DBA_length)))
+
+
 
 blasDBsnRNA=blastFilterTranscriptType(blastDB,'snRNA',22)
 snRNAIDs=queryIDs(blasDBsnRNA)
@@ -428,5 +473,6 @@ length(TECRNAIDs)
 length(which(TECRNAIDs %in% orfIdA))
 length(which(TECRNAIDs %in% orfIdB))
 length(which(TECRNAIDs %in% orfIdC))
+
 
 
