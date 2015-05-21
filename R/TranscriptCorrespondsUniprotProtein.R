@@ -50,24 +50,26 @@ isoformCheck <- function(id, Mat)
 }
 
 excUni="onlyDM_from_raw_uniprot+fdr+th+grouping+prt.csv1e-30_compared_trinity_PITORF+fdr+th+grouping+prt.csv_1e-30.tsv"
+
+##################################################################### Finding Uniprot protein that can not be identified from trinity ORFs, because they were not expressed  #################################
 excUni="PAGComparison_UniprotOnly_withTrinity.tsv"
 d1="D:/data/Results/Human-Adeno/Identification/"
 
 uniOnly=readExclusiveProteinList(excUni, d1)
 uniOnly_ids=uniIdRegex(uniOnly,3)
 
-> biomart="GRCh38_gene_transcript_protein_biomart.csv"
-> d4="D:/data/Data/"
+biomart="GRCh38_gene_transcript_protein_biomart.csv"
+d4="D:/data/Data/"
 biomartMat=readBioMartMapping(biomart,d4)
-> d3
-[1] "D:/data/blast/blastCSV/"
-> f4="human_adenovirus_trinityRNA_blast.csv"
+d3="D:/data/blast/blastCSV/"
+f4="human_adenovirus_trinityRNA_blast.csv"
 upper=0.000000000000000000000000000001
 blastDB=blastFilterEval(blastFilterMatch(blast(f4,d3),1),upper)
-f5="overlap_trinityPITORF_uniprot_1e-30.tsv"
-> d2
-[1] "D:/data/Results/Human-Adeno/Identification/"
-#overlapMat=readExclusiveProteinList(f5,d2)
+f5="AnchortoAnchor_PAGs_uni_trinity1e-30.tsv"
+d2="D:/data/Results/Human-Adeno/Identification/"
+overlapMat=readExclusiveProteinList(f5,d2)
+f6="AnchortoSub_PAGs_uni_trinity1e-30.tsv"
+overlapMat=rbind(overlapMat,readExclusiveProteinList(f6,d2))
 uni_ids=sub("([^-]+)?-(.*)?","\\1",uniOnly_ids[,'protein.accession'])
 overlap_uni_ids=sub("(.*)?\\|([^\\|]+)?\\|(.*)?","\\2",overlapMat[,'protein.accession'])
 length(which(uni_ids %in% overlap_uni_ids))
@@ -92,6 +94,67 @@ UniprotOnlyBioMart=rbind(transcripts_ids,trembl_transcripts_ids)
 length(unique(transcripts_ids[which(transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'UniProt.SwissProt.Accession']))
 length(unique(trembl_transcripts_ids[which(trembl_transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'UniProt.TrEMBL.Accession']))
 expressedUniProteins=c(unique(transcripts_ids[which(transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'UniProt.SwissProt.Accession']),unique(trembl_transcripts_ids[which(trembl_transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'UniProt.TrEMBL.Accession']))
+old_proteins_trinity=uni_ids[which(!uni_ids %in% expressedUniProteins)]
+
+d5="D:/data/Results/Human-Adeno/GIOPaperResults/PostProcessings/"
+write.csv(old_protein,file=paste(d5,"Unexpressed_trinity.csv",sep=""),quote=FALSE,row.names = FALSE)
+################################################################################################################
+
+##################################################################### Finding Uniprot protein that can not be identified from cufflinks ORFs, because they were not expressed  #################################
+excUni="PAGComparison_UniprotOnly_withCuff1e-30.tsv"
+d1="D:/data/Results/Human-Adeno/Identification/"
+
+uniOnly=readExclusiveProteinList(excUni, d1)
+uniOnly_ids=uniIdRegex(uniOnly,3)
+
+biomart="GRCh38_gene_transcript_protein_biomart.csv"
+d4="D:/data/Data/"
+biomartMat=readBioMartMapping(biomart,d4)
+d3="D:/data/blast/blastCSV/"
+f4="human_CufflinksRNA_blast.csv"
+upper=0.000000000000000000000000000001
+blastDB=blastFilterEval(blastFilterMatch(blast(f4,d3),1),upper)
+f5="AnchortoAnchor_PAGs_uni_cuff1e-30.tsv"
+d2="D:/data/Results/Human-Adeno/Identification/"
+overlapMat=readExclusiveProteinList(f5,d2)
+f6="AnchortoSub_PAGs_uni_cuff1e-30.tsv"
+overlapMat=rbind(overlapMat,readExclusiveProteinList(f6,d2))
+uni_ids=sub("([^-]+)?-(.*)?","\\1",uniOnly_ids[,'protein.accession'])
+overlap_uni_ids=sub("(.*)?\\|([^\\|]+)?\\|(.*)?","\\2",overlapMat[,'protein.accession'])
+length(which(uni_ids %in% overlap_uni_ids))
+iso_overlap=uni_ids[which(uni_ids %in% overlap_uni_ids)]
+
+###PAG level overlap
+### Finding ensembl transcript ids: no of transcripts can be more as one protein might be produced from different transcript
+uni_ids_backup=uni_ids
+uni_ids=uni_ids[-which(uni_ids %in% overlap_uni_ids)]
+length(uni_ids)
+
+transcripts_ids=biomartMat[which(biomartMat[,'UniProt.SwissProt.Accession'] %in% uni_ids),]
+rest_uni_ids=uni_ids[-which(uni_ids %in% biomartMat[,'UniProt.SwissProt.Accession'])]
+biomartMat_temp=biomartMat[which(!biomartMat[,'UniProt.SwissProt.Accession'] %in% uni_ids),]
+trembl_transcripts_ids=biomartMat_temp[which(biomartMat_temp[,'UniProt.TrEMBL.Accession'] %in% rest_uni_ids),]
+blastTranscripts=sub("([^\\s]+) (.*)?","\\1",blastDB[,'hit_def'])
+rest2_uni_ids=rest_uni_ids[-which(rest_uni_ids %in% biomartMat_temp[,'UniProt.TrEMBL.Accession'])]
+#transcripts_ids[which(transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'UniProt.SwissProt.Accession']
+
+UniprotOnlyBioMart=rbind(transcripts_ids,trembl_transcripts_ids)
+
+length(unique(transcripts_ids[which(transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'UniProt.SwissProt.Accession']))
+length(unique(trembl_transcripts_ids[which(trembl_transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'UniProt.TrEMBL.Accession']))
+expressedUniProteins=c(unique(transcripts_ids[which(transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'UniProt.SwissProt.Accession']),unique(trembl_transcripts_ids[which(trembl_transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'UniProt.TrEMBL.Accession']))
+old_proteins_cufflinks=uni_ids[which(!uni_ids %in% expressedUniProteins)]
+
+d5="D:/data/Results/Human-Adeno/GIOPaperResults/PostProcessings/"
+write.csv(old_protein,file=paste(d5,"Unexpressed_cufflinks.csv",sep=""),quote=FALSE,row.names = FALSE)
+################################################################################################################
+## Overlap between trinity and cufflinks old protein
+################################################################################################################
+length(which(old_proteins_trinity %in% old_proteins_cufflinks))
+
+
+
+################################################################################################################
 
 #unique(transcripts_ids[which(transcripts_ids[,'Ensembl.Transcript.ID'] %in% unique(blastTranscripts)),'Ensembl.Transcript.ID'])
 ##Ensembl transcripts for Uni only proteins, which have Ensemble transcripts to uniprot/trembl protein map and Trinity transcript mapped to them.

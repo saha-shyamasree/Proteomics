@@ -44,6 +44,12 @@ java -Xms1024m -jar mzidentml-lib.jar Threshold G:\SearchEngine_output\MSGF+\tri
 java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper G:\SearchEngine_output\MSGF+\trinity_PITORF+fdr+th.mzid G:\SearchEngine_output\MSGF+\trinity_PITORF+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
 java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\trinity_PITORF+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\trinity_PITORF+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
 java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\trinity_PITORF+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\trinity_PITORF+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
+#on laptop
+java -Xms1024m -jar mzidentml-lib.jar Threshold D:\data\Results\Human-Adeno\GIOPaperResults\trinity\trinity_PITORF+fdr.mzid D:\data\Results\Human-Adeno\GIOPaperResults\trinity\trinity_PITORF+fdr+th2.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold false
+java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper D:\data\Results\Human-Adeno\GIOPaperResults\trinity\trinity_PITORF+fdr+th2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\trinity\trinity_PITORF+fdr+th+grouping2.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPaperResults\trinity\trinity_PITORF+fdr+th+grouping2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\trinity\trinity_PITORF+fdr+th+grouping2.csv -exportType  exportPSMs  -compress false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPaperResults\trinity\trinity_PITORF+fdr+th+grouping2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\trinity\trinity_PITORF+fdr+th+grouping+prt2.csv -exportType  exportProteinsOnly  -compress false
+
 
 ###SORF shortest mainORF - 30bp, shortest uORF 24bp, longest 5` uORF - 200bp
 java -Xmx12500M -jar MSGFPlus.jar -s J:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\Trinity\trinityV3_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\HumanAdeno\sORF\trinity_PITORF.mzid -mod J:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
@@ -61,6 +67,7 @@ java -Xms8024m -jar mzidentml-lib.jar ProteoGrouper G:\SearchEngine_output\MSGF+
 java -Xms8024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\HumanAdeno\sORF\trinity_PITORF+fdr+th+groupingV4.mzid G:\SearchEngine_output\MSGF+\HumanAdeno\sORF\trinity_PITORF+fdr+th+groupingV4.csv -exportType  exportPSMs  -compress false
 java -Xms8024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\HumanAdeno\sORF\trinity_PITORF+fdr+th+groupingV4.mzid G:\SearchEngine_output\MSGF+\HumanAdeno\sORF\trinity_PITORF+fdr+th+grouping+prtV4.csv -exportType  exportProteinsOnly  -compress false
 
+
 ##sORFs, shortest mainORF - 30bp, shortest uORF 24bp, longest 5` uORF - 600bp
 java -Xmx12500M -jar MSGFPlus.jar -s J:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\Trinity\trinityV5_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\HumanAdeno\sORF\trinity_PITORFV5.mzid -mod J:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
 java -Xms8024m -jar mzidentml-lib.jar FalseDiscoveryRate G:\SearchEngine_output\MSGF+\HumanAdeno\sORF\trinity_PITORFV5.mzid G:\SearchEngine_output\MSGF+\HumanAdeno\sORF\trinity_PITORF+fdrV5.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true
@@ -71,7 +78,7 @@ java -Xms8024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\Huma
 
 ##uniprot
 
-java -Xmx8500M -jar MSGFPlus.jar -s C:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\human_adenovirus_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot.mzid -mod C:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
+java -Xmx8500M -jar MSGFPlus.jar -s C:\Data\HUMAN\mgf\DM_from_raw.mgf -d K:\E\Data\HUMAN\database\human_adenovirus_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot.mzid -mod C:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
 java -Xms1024m -jar mzidentml-lib.jar FalseDiscoveryRate C:\Data\HUMAN\mgf\DM_from_raw_uniprot.mzid C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true
 java -Xms1024m -jar mzidentml-lib.jar Threshold C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr.mzid C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold true
 
@@ -80,6 +87,13 @@ java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv C:\Data\HUMAN\mgf\DM_from_raw_uni
 java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th.mzid C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
 java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th+grouping.mzid C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
 java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv C:\Data\HUMAN\mgf\DM_from_raw_uniprot+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
+
+
+#on laptop, not removing PSMs below threshold
+java -Xms1024m -jar mzidentml-lib.jar Threshold D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-trinity\DM_from_raw_uniprot+fdr.mzid D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-trinity\DM_from_raw_uniprot+fdr+th2.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold false
+java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-trinity\DM_from_raw_uniprot+fdr+th2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-trinity\DM_from_raw_uniprot+fdr+th+grouping2.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-trinity\DM_from_raw_uniprot+fdr+th+grouping2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-trinity\DM_from_raw_uniprot+fdr+th+grouping2.csv -exportType  exportPSMs  -compress false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-trinity\DM_from_raw_uniprot+fdr+th+grouping2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-trinity\DM_from_raw_uniprot+fdr+th+grouping+prt2.csv -exportType  exportProteinsOnly  -compress false
 
 
 ##Cufflinks (genome guided, main-sORFs included)
@@ -97,6 +111,21 @@ java -Xms1024m -jar mzidentml-lib.jar Threshold G:\SearchEngine_output\MSGF+\cuf
 java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th.mzid G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
 java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
 java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\cufflinks_main_PITORF+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
+
+#on laptop, not removing PSMs below threshold
+java -Xms1024m -jar mzidentml-lib.jar Threshold D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr.mzid D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr+th2.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold false
+java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr+th2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr+th+grouping2.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr+th+grouping2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr+th+grouping2.csv -exportType  exportPSMs  -compress false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr+th+grouping2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr+th+grouping+prt2.csv -exportType  exportProteinsOnly  -compress false
+
+##Uniprot, genome guided
+
+#on Laptop, not removing PSMs below threshold
+
+java -Xms1024m -jar mzidentml-lib.jar Threshold D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-Cufflinks\human_uniprot+fdr.mzid D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-Cufflinks\human_uniprot+fdr+th2.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold false
+java -Xms1024m -jar mzidentml-lib.jar ProteoGrouper D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-Cufflinks\human_uniprot+fdr+th2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-Cufflinks\human_uniprot+fdr+th+grouping2.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-Cufflinks\human_uniprot+fdr+th+grouping2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-Cufflinks\human_uniprot+fdr+th+grouping2.csv -exportType  exportPSMs  -compress false
+java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-Cufflinks\human_uniprot+fdr+th+grouping2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\Uniprot-Cufflinks\human_uniprot+fdr+th+grouping+prt2.csv -exportType  exportProteinsOnly  -compress false
 
 ############################################## X!Tandem ##########################################
 
@@ -151,3 +180,12 @@ java -Xms4024m -jar mzidentml-lib.jar Threshold I:\Human-Hendra\SearchEngine\MSG
 java -Xms4024m -jar mzidentml-lib.jar ProteoGrouper I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th.mzid I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
 java -Xms4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th+grouping.mzid I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
 java -Xms4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th+grouping.mzid I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
+
+############################################# Human Adeno, PASA assembly ORFs   ################################################
+I:\Human-Adenovirus\ProteinIdent
+java -Xmx12000M -jar MSGFPlus.jar -s /data/scratch/btw796/Data/HumanAdeno/MS/DM_from_raw.mgf -d  /data/scratch/btw796/Data/HumanAdeno/fasta/human_adeno_mydb_pasa.assemblies_ORFs_concatenated_target_decoy.fasta -o I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1.mzid -mod /data/scratch/btw796/Data/HumanAdeno/MS/modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8
+java -Xmx10024m -jar mzidentml-lib.jar FalseDiscoveryRate I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1.mzid I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true
+java -Xmx8024m -jar mzidentml-lib.jar Threshold I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr.mzid I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold true
+java -Xmx4024m -jar mzidentml-lib.jar ProteoGrouper I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th.mzid I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
+java -Xmx4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping.mzid I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
+java -Xmx4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping.mzid I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false

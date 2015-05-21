@@ -1,0 +1,4 @@
+Entry	Entry name	Status	Protein names	Gene names	Organism	Length	Natural variant	Proteomes
+P31946	1433B_HUMAN	reviewed	14-3-3 protein beta/alpha (Protein 1054) (Protein kinase C inhibitor protein 1) (KCIP-1) [Cleaved into: 14-3-3 protein beta/alpha, N-terminally processed]	YWHAB	Homo sapiens (Human)	246	VARIANT 99 99 V -> I (found in a renal cell carcinoma sample; somatic mutation). {ECO:0000269|PubMed:21248752}. /FTId=VAR_064762.	UP000005640: Chromosome 20
+P62258	1433E_HUMAN	reviewed	14-3-3 protein epsilon (14-3-3E)	YWHAE	Homo sapiens (Human)	255		UP000005640: Chromosome 17, UP000005640: Unplaced
+Q04917	1433F_HUMAN	reviewed	14-3-3 protein eta (Protein AS1)	YWHAH YWHA1	Homo sapiens (Human)	246		UP000005640: Chromosome 22
