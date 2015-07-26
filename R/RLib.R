@@ -9,7 +9,7 @@ countPSMs<-function(Mat1)
     length(unique(Mat1[,'Spectrum.ID']))
 }
 
-overlapPepIndices<-function(Mat1,Mat2)
+overlapPepIndices<-function(Mat1, Mat2, column1, column2)
 {
     which(Mat1[,column1] %in% Mat2[,column2])
 }
@@ -38,6 +38,11 @@ proteinGroup <- function(filename,dirc)
 {
     as.matrix(read.csv(file=paste(dirc,filename,sep=""),header=TRUE))
 }
+proteinList <- function(filename,dirc, sep)
+{
+    as.matrix(read.table(file=paste(dirc,filename,sep=""),sep=sep,header=TRUE))
+}
+
 
 proteinGroupFiltered<- function(proteinGrp,rev,peptide,pepThreshold)
 {
@@ -55,6 +60,19 @@ proteinGroupFiltered<- function(proteinGrp,rev,peptide,pepThreshold)
         print(dim(proteinGrp))
     }
     proteinGrp
+}
+
+oneHitWonderProteinGrp<-function(proteinGrp,rev)
+{
+    proteinGrp=as.matrix(proteinGrp)
+    print(dim(proteinGrp))
+    if(rev==1)
+    {
+        proteinGrp=proteinGrp[-(grep("_REVERSED",proteinGrp[,'protein.accession'])),]
+        print(dim(proteinGrp))
+    }
+    proteinGrp[,'distinct.peptide.sequences']=as.numeric(proteinGrp[,'distinct.peptide.sequences'])
+    proteinGrp=proteinGrp[which(proteinGrp[,'distinct.peptide.sequences']==1),]
 }
 
 proteinGrpSize <- function(proteinGrp)

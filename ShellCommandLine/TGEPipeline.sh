@@ -1,0 +1,35 @@
+# This is the pipeline to sample wise assembles RNA-Seq data using Trinity. Before carrying out the assembly, for paired end stranded data
+# one sample is mapped to the genome, if available, to find out library type. Mapped reads need to be manually observed to identify the read
+# orientation.
+############################################################################################################################################
+###################################################### This is for model organisms #########################################################
+############################################################################################################################################
+
+## Get the genome from Ensembl
+wget ftp://ftp.ensembl.org/pub/release-80/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz /data/SBCS-BessantLab/shyama/Data/Oliver/fasta/Homo_sapiens.GRCh38.dna.toplevel.fa.gz
+## Build bowtie2 index from the refernec genome
+echo "bowtie2-build /data/SBCS-BessantLab/shyama/Data/Oliver/fasta/Homo_sapiens.GRCh38.dna.toplevel.fa /data/SBCS-BessantLab/shyama/Data/Oliver/fasta/Homo_sapiens.GRCh38.dna.toplevel" | qsub -cwd -V -l h_vmem=20G -l h_rt=48:0:0
+## Map first 3000 reads to the genome for strand specific library type identification
+echo "bowtie2 -q -u 3000 --no-mixed --qc-filter -x /data/SBCS-BessantLab/shyama/Data/Oliver/fasta/Homo_sapiens.GRCh38.dna.toplevel -1 /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G10_1.fastq.gz -2 /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G10_2.fastq.gz -S /data/SBCS-BessantLab/shyama/Data/Oliver/libraryTypeExp/G10.sam" | qsub -cwd -V -l h_vmem=16G -l h_rt=24:0:0
+
+## After this step I load the sam file in IGV. The sam file is sorted and index using igvtools from IGV and viewed to identify the strand specific library type, i.e.
+## forward-reverse or reverse-forward.
+
+## Following command should take each sample and assemble them.
+## Run trinity to do both de novo and genome guided assembly
+## de novo
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G10_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G10_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G10 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G11_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G11_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G11 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G15_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G15_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G15 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G17_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G17_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G17 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G29a_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G29a_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G29a --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G30_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G30_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G30 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G33a_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G33a_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G33a --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G36_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G36_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G36 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G42_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G42_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G42 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G43_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G43_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G43 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G45_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G45_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G45 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G51_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G51_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G51 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G54_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G54_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G54 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G57_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G57_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G57 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0

@@ -29,7 +29,6 @@ identifiedORFsClassIsoform<-function(identifiedORFs, isoformList, outFile)
 }
 
 
-
 ################################# 20-05-2015 ##############################################
 #### PASA assembly for human adenovirus
 

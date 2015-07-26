@@ -1,6 +1,9 @@
 ################################## MSConvert  ##########################################
 
 ############################### MSGF+ ######################################
+#Update 09/06/2015
+# I should allow at least 2 maps for a spectrum so that I can compre the delta score.
+
 ##############Uniprot Second run with adenovirus falimy and including Human Papiloma Virus #####################
 java -Xmx12500M -jar MSGFPlus.jar -s J:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\uniprot_Human_Mastadenovirus_human_papiloma_virus_types_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2.mzid -mod J:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
 java -Xms10024m -jar mzidentml-lib.jar FalseDiscoveryRate G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2.mzid G:\SearchEngine_output\MSGF+\DM_from_raw_uniprot2+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true
@@ -119,6 +122,15 @@ java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPa
 java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr+th+grouping2.mzid D:\data\Results\Human-Adeno\GIOPaperResults\cufflinks\cufflinks_main_PITORF+fdr+th+grouping+prt2.csv -exportType  exportProteinsOnly  -compress false
 
 ##Uniprot, genome guided
+### Only human uniprot ###
+
+java -Xmx12500M -jar MSGFPlus.jar -s J:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\HUMAN_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\human_uniprot.mzid -mod J:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
+java -Xms10024m -jar mzidentml-lib.jar FalseDiscoveryRate G:\SearchEngine_output\MSGF+\human_uniprot.mzid G:\SearchEngine_output\MSGF+\human_uniprot+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true
+java -Xms5024m -jar mzidentml-lib.jar Threshold G:\SearchEngine_output\MSGF+\human_uniprot+fdr.mzid G:\SearchEngine_output\MSGF+\human_uniprot+fdr+th.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold true
+java -Xms5024m -jar mzidentml-lib.jar ProteoGrouper G:\SearchEngine_output\MSGF+\human_uniprot+fdr+th.mzid G:\SearchEngine_output\MSGF+\human_uniprot+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
+#java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv C:\Data\HUMAN\mgf\DM_from_raw_uni_trinity+fdr+th+grouping.mzid C:\Data\HUMAN\mgf\DM_from_raw_uni_trinity+fdr+th+grouping_prt_grp.csv -exportType  exportProteinGroups  -compress false
+java -Xms5024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\human_uniprot+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\human_uniprot+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
+java -Xms5024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\human_uniprot+fdr+th+grouping.mzid G:\SearchEngine_output\MSGF+\human_uniprot+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
 
 #on Laptop, not removing PSMs below threshold
 

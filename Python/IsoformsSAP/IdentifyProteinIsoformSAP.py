@@ -444,12 +444,12 @@ def read(filename, matchCol, evalTheshold, evalCol, gTh, gCol, lCol, qLenCol, sL
             else:
                 count=count+1
 
-filename="D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV2.csv"
-SAPFileName="human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV4.vcf"
-knownProteinFileName="D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsV2.csv"
-knownProteinSAPFileName="D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsSAPsV2.csv"
-isoformsFileName="D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV2.csv"
-isoformsSAPsFileName="D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV2.csv"
+filename="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV2.csv"
+SAPFileName="human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV5.vcf"
+knownProteinFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsV5.csv"
+knownProteinSAPFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsSAPsV5.csv"
+isoformsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV5.csv"
+isoformsSAPsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV5.csv"
 matchCol=2
 evalTheshold=0.000000000000000000000000000001
 evalCol=6

@@ -1,0 +1,1 @@
+temp=c(which(DBA_CDSIDs_length==0),which(DBA_nonsense_mediated_decayIDs_length==0),which(DBA_lincIDs_length==0),which(DBA_retained_intronIDs_length==0),which(DBA_processed_transcriptIDs_length==0),which(DBA_antisenseIDs_length==0))

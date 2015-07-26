@@ -1,3 +1,8 @@
+###### this code reads the the output of contigStat.py which is essentially BLAST result in csv format. Second input to this an excel file downloaded
+###### from the Uniprot website that tells us the chomosome location of the proteins. In future this step needs to be done programatically. Third and
+###### the last parameter to this script is the output path. Output of this script is similar to that of the first input file, with an extra column for
+###### the location of the protein.
+
 import os
 import csv
 import re

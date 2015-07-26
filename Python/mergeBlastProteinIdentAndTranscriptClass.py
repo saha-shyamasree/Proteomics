@@ -1,4 +1,6 @@
-## this code takes list of ORFs grouped based of the biotype of their parent transcripts, ORFs ids mapped to uniprot using blast, protein identification results, and SAP/INDELs to merge these information. #Output of this script will then be merged with peptide evidences.
+## this code takes list of ORFs grouped based of the biotype of their parent transcripts, ORFs ids mapped to uniprot using blast,
+## protein identification results, and SAP/INDELs to merge these information. #Output of this script will then be merged with
+## peptide evidences.
 import csv
 import re
 
@@ -11,10 +13,11 @@ transcriptLengthRatioCol=
 locationCol=
 
 
+## Here protein subgrouping is based on transcript biotype
 def compareProteinParentTranscriptClass(prtSubGrpFilepath, orfToUniprotMap, prtIdCol):
-    with open(filePath, newline='') as transClassFile:
+    with open(prtSubGrpFilepath, newline='') as prtSubGrpFile:
+    transClassReader = csv.reader(prtSubGrpFile, delimiter=',')
         count=0
-        
         for line in transClassReader:
             if count>0:
                 ##find the ORF in orfToUniprotMap

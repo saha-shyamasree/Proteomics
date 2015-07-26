@@ -38,11 +38,11 @@ class AminoAcidVariation:
     def toString(self):
         if int(self.alingmentInfo['subjectStart'])!=1:
             prefix=int(self.alingmentInfo['subjectStart'])-1;
-            return self.chr+"\t"+str(self.pos+prefix)+"\t"+str(self.alingmentInfo['qSerialNo'])+"."+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"SubjectId="+self.subjectId+";QueryId="+self.queryId+";Alignment=[QueryLength="+self.alingmentInfo['qLen']+":QueryStart="+self.alingmentInfo['queryStart']+":QueryEnd="+self.alingmentInfo['queryEnd']+":SubjectLength="+self.alingmentInfo['sLen']+":SubjectStart="+self.alingmentInfo['subjectStart']+":SubjectEnd="+self.alingmentInfo['subjectEnd']+"];Type:"+self.type;
+            return self.chr+"\t"+str(self.pos+prefix)+"\t"+str(self.alingmentInfo['qSerialNo'])+"."+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"SubjectId="+self.subjectId+";QueryId="+self.queryId.replace(';','&')+";Alignment=[QueryLength="+self.alingmentInfo['qLen']+":QueryStart="+self.alingmentInfo['queryStart']+":QueryEnd="+self.alingmentInfo['queryEnd']+":SubjectLength="+self.alingmentInfo['sLen']+":SubjectStart="+self.alingmentInfo['subjectStart']+":SubjectEnd="+self.alingmentInfo['subjectEnd']+"];Type:"+self.type;
         else:
-            return self.chr+"\t"+str(self.pos)+"\t"+str(self.alingmentInfo['qSerialNo'])+"."+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"SubjectId="+self.subjectId+";QueryId="+self.queryId+";Alignment=[QueryLength="+self.alingmentInfo['qLen']+":QueryStart="+self.alingmentInfo['queryStart']+":QueryEnd="+self.alingmentInfo['queryEnd']+":SubjectLength="+self.alingmentInfo['sLen']+":SubjectStart="+self.alingmentInfo['subjectStart']+":SubjectEnd="+self.alingmentInfo['subjectEnd']+"];Type:"+self.type;
+            return self.chr+"\t"+str(self.pos)+"\t"+str(self.alingmentInfo['qSerialNo'])+"."+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"SubjectId="+self.subjectId+";QueryId="+self.queryId.replace(';','&')+";Alignment=[QueryLength="+self.alingmentInfo['qLen']+":QueryStart="+self.alingmentInfo['queryStart']+":QueryEnd="+self.alingmentInfo['queryEnd']+":SubjectLength="+self.alingmentInfo['sLen']+":SubjectStart="+self.alingmentInfo['subjectStart']+":SubjectEnd="+self.alingmentInfo['subjectEnd']+"];Type:"+self.type;
     def printVar(self):
-        print(self.chr+"\t"+str(self.pos)+"\t"+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"ProtId:"+self.subjectId+";ORFId:"+self.queryId+";Type:"+self.type)
+        print(self.chr+"\t"+str(self.pos)+"\t"+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"ProtId:"+self.subjectId+";ORFId:"+self.queryId.replace(';','&')+";Type:"+self.type)
     @staticmethod
     def printHeader():
         return "#Chr\tPOS within Protein\tID\tREF\tALT\tINFO"
