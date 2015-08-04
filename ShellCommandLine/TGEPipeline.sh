@@ -31,5 +31,41 @@ echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oli
 echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G45_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G45_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G45 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
 echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G51_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G51_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G51 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
 echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G54_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G54_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G54 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
-
 echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G57_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G57_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G57 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G58_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G58_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G58 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G67_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G67_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G67 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+echo "Trinity --seqType fq --JM 30G --left /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G69_1.fastq.gz --right /data/SBCS-BessantLab/shyama/Data/Oliver/RNA/G69_2.fastq.gz --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/G69 --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+
+dir='/data/SBCS-BessantLab/shyama/Data/Oliver/RNA/'
+for file in "$dir"G7*_1.* "$dir"G8*_1* "$dir"G9*_1*
+do
+    if [ -f $file ]; then
+        #echo $file
+        file2=$(echo $file | sed -e "s/_1/_2/g")
+        #echo $file2
+        sample=$(basename $file | sed -e "s/_1.fastq.gz//g") 
+        echo "Trinity --seqType fq --JM 30G --left $file --right $file2 --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/$sample --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+    fi
+done
+
+dir='/data/SBCS-BessantLab/shyama/Data/Oliver/RNA/'
+for file in "$dir"G1[0-9][0-9]_1.*
+do
+    if [ -f $file ]; then
+        #echo $file
+        file2=$(echo $file | sed -e "s/_1/_2/g")
+        #echo $file2
+        sample=$(basename $file | sed -e "s/_1.fastq.gz//g") 
+        echo "Trinity --seqType fq --JM 30G --left $file --right $file2 --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/$sample --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+    fi
+done
+
+## remove the trinity directories
+dir='/data/SBCS-BessantLab/shyama/Data/Oliver/RNA/'
+for file in "$dir"G7*_1.* "$dir"G8*_1* "$dir"G9*_1*
+do
+    if [ -f $file ]; then
+        sample=$(basename $file | sed -e "s/_1.fastq.gz//g") 
+        echo "rm -R /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/$sample" | qsub -cwd -V -l h_vmem=2G -l h_rt=72:0:0
+    fi
+done
