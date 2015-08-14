@@ -212,6 +212,7 @@ def printVariationListtoFile(varList, fileWrt):
 def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
     aaVariationList=[]
     mixCount=0;
+    
     if len(qSeq)==len(sSeq) and len(sSeq)==len(mSeq):
         ##this should always be true.
         match=re.finditer('\s+',mSeq);
@@ -374,6 +375,9 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
         #printVariationList(aaVariationList);
     else:
         print("ERROR, alignment sequences have different number of amino acids");
+        print("qSeq:"+qSeq)
+        print("sSeq:"+sSeq)
+        print("mSeq:"+mSeq)
     return aaVariationList;
 
 def classify(line, matchCol, evalTheshold,evalCol, gTh, gCol, lCol, qLenCol, sLenCol, qSeqCol, sSeqCol, mSeqCol, qSt, qEnd, sSt, sEnd, sId, qId, chromosome, SAPFileWriter, count, knownProteinFile, knownProteinSAPFile, isoformsFile, isoformsSAPsFile):
@@ -437,6 +441,7 @@ def read(filename, matchCol, evalTheshold, evalCol, gTh, gCol, lCol, qLenCol, sL
         isoformsFile.write("ORF Id, Protein ID, Type\n");
         isoformsSAPsFile.write("ORF Id, Protein ID, Type\n");
         for line in reader:
+            print("line length:"+str(len("".join(line))))
             if count>0:
                 #print("classify called");
                 classify(line, matchCol, evalTheshold,evalCol, gTh, gCol, lCol, qLenCol, sLenCol, qSeqCol, sSeqCol, mSeqCol, qSt, qEnd, sSt, sEnd, sId, qId, chromosome, SAPFile, count, knownProteinFile, knownProteinSAPFile, isoformsFile, isoformsSAPsFile)
@@ -444,12 +449,12 @@ def read(filename, matchCol, evalTheshold, evalCol, gTh, gCol, lCol, qLenCol, sL
             else:
                 count=count+1
 
-filename="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV2.csv"
-SAPFileName="human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV5.vcf"
-knownProteinFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsV5.csv"
-knownProteinSAPFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsSAPsV5.csv"
-isoformsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV5.csv"
-isoformsSAPsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV5.csv"
+filename="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV3.csv"
+SAPFileName="human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV6.vcf"
+knownProteinFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsV6.csv"
+knownProteinSAPFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsSAPsV6.csv"
+isoformsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV6.csv"
+isoformsSAPsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV6.csv"
 matchCol=2
 evalTheshold=0.000000000000000000000000000001
 evalCol=6

@@ -1,4 +1,131 @@
-### this code compare ORFs to Uniprot proteins blast result, where ORFs are generated from either trinity assebled transcripts or PASA assemblies.
+###Compares length of identified proteins/ORFs from two protein DBs.
+
+source("D:/Code/Proteomics/R/RLib.R")
+library(reshape)
+library(ggplot2)
+readMatrices<-function(f1,f2,f3,f4,d1,d2,d3,d4,rev=1,peptide=1,pepThreshold=1)
+{
+    Mat1=proteinGroupFiltered(proteinGroup(f1,d1),rev,peptide,pepThreshold)
+    Mat2=proteinGroupFiltered(proteinGroup(f2,d2),rev,peptide,pepThreshold)
+    blastDB1=blast(f3,d3)
+    blastDB2=blast(f4,d4)
+    Mat1=replaceComma(Mat1,3)
+    Mat1=upto(Mat1,3,';')
+    Mat1=upto(Mat1,3,' ')
+    Mat2=replaceComma(Mat2,3)
+    Mat2=upto(Mat2,3,';')
+    Mat2=upto(Mat2,3,' ')
+    blastDB1=upto(blastDB1,1,';')
+    blastDB1=upto(blastDB1,1,',')
+    blastDB1=upto(blastDB1,4,' ')
+    
+    blastDB2=upto(blastDB2,1,';')
+    blastDB2=upto(blastDB2,1,',')
+    blastDB2=upto(blastDB2,4,' ')
+    
+    Mat1[,'protein.accession']=sub("^sw","sp",Mat1[,'protein.accession'])
+    Mat2[,'protein.accession']=sub("^sw","sp",Mat2[,'protein.accession'])
+    list(Mat1=Mat1, Mat2=Mat2, blastDB1=blastDB1, blastDB2=blastDB2)
+}
+
+boxPlotIdentifiedORFs<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Name, outDir)
+{
+    Mat1IdenfiedORFsLenth=blastDB1[which(blastDB1[,'query_name'] %in% Mat1[,'protein.accession']),'query_length']
+    Mat2IdenfiedORFsLenth=blastDB2[which(blastDB2[,'query_name'] %in% Mat2[,'protein.accession']),'query_length']
+    maxLen=max(length(Mat1IdenfiedORFsLenth), length(Mat2IdenfiedORFsLenth))
+    length(Mat1IdenfiedORFsLenth)=maxLen
+    length(Mat2IdenfiedORFsLenth)=maxLen
+    mergedL=cbind(DB1=Mat1IdenfiedORFsLenth,DB2=Mat2IdenfiedORFsLenth)
+    colnames(mergedL)=c(Mat1Name, Mat2Name)
+    mergedL_melted = melt(mergedL)
+    colnames(mergedL_melted)=c('SerialNo','Software','Length')
+    
+    ##box plot
+    p2 <- ggplot(mergedL_melted, aes( factor( Software ), Length, colour=Software ) ) +xlab("Database Source") + ylab("Length") + geom_boxplot() + ggtitle("Identified ORFs Length")
+    tiff(filename = paste(outDir,Mat1Name,"_",Mat2Name,"IdentifiedORFs.tiff",sep=""), width = 480, height = 480, compression = c("none"), bg = "white")
+    p2
+    dev.off()
+}
+
+boxPlotIdentifiedUniprotHomologousORFs<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Name, outDir, upper)
+{
+    Mat1IdentifiedBlast=blastDB1[which(blastDB1[,'query_name'] %in% Mat1[,'protein.accession']),]
+    Mat2IdentifiedBlast=blastDB2[which(blastDB2[,'query_name'] %in% Mat2[,'protein.accession']),]
+    
+    Mat1IdenfiedORFsLenth=blastFilterEval(blastFilterMatch(Mat1IdentifiedBlast,1),upper)[,'query_length']
+    Mat2IdenfiedORFsLenth=blastFilterEval(blastFilterMatch(Mat2IdentifiedBlast,1),upper)[,'query_length']
+    maxLen=max(length(Mat1IdenfiedORFsLenth), length(Mat2IdenfiedORFsLenth))
+    length(Mat1IdenfiedORFsLenth)=maxLen
+    length(Mat2IdenfiedORFsLenth)=maxLen
+    mergedL=cbind(DB1=Mat1IdenfiedORFsLenth,DB2=Mat2IdenfiedORFsLenth)
+    colnames(mergedL)=c(Mat1Name, Mat2Name)
+    mergedL_melted = melt(mergedL)
+    colnames(mergedL_melted)=c('SerialNo','Software','Length')
+    
+    ##box plot
+    p2 <- ggplot(mergedL_melted, aes( factor( Software ), Length, colour=Software ) ) +xlab("Database Source") + ylab("Length") + geom_boxplot() + ggtitle("Identified ORFs Length")
+    tiff(filename = paste(outDir,Mat1Name,"_",Mat2Name,"IdentifiedUniprotHomologousORFs.tiff",sep=""), width = 480, height = 480, compression = c("none"), bg = "white")
+    p2
+    dev.off()
+}
+
+boxPlotIdentifiedUniprotHomologousORFsLongMatch<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Name, outDir, upper)
+{
+    print(upper)
+    Mat1IdentifiedBlast=blastDB1[which(blastDB1[,'query_name'] %in% Mat1[,'protein.accession']),]
+    Mat2IdentifiedBlast=blastDB2[which(blastDB2[,'query_name'] %in% Mat2[,'protein.accession']),]
+    
+    Mat1IdenfiedORFsLenth=blastFilterEval(blastFilterMatch(Mat1IdentifiedBlast,1),upper)[,'long_match']
+    Mat2IdenfiedORFsLenth=blastFilterEval(blastFilterMatch(Mat2IdentifiedBlast,1),upper)[,'long_match']
+    maxLen=max(length(Mat1IdenfiedORFsLenth), length(Mat2IdenfiedORFsLenth))
+    length(Mat1IdenfiedORFsLenth)=maxLen
+    length(Mat2IdenfiedORFsLenth)=maxLen
+    mergedL=cbind(DB1=Mat1IdenfiedORFsLenth,DB2=Mat2IdenfiedORFsLenth)
+    colnames(mergedL)=c(Mat1Name, Mat2Name)
+    mergedL_melted = melt(mergedL)
+    colnames(mergedL_melted)=c('SerialNo','Software','LengthRatio')
+    
+    ##box plot
+    p2 <- ggplot(mergedL_melted, aes( factor( Software ), LengthRatio, colour=Software ) ) +xlab("Database Source") + ylab("Length Ratio") + geom_boxplot() + ggtitle("Identified ORFs Length Ratio against the Uniprot")
+    tiff(filename = paste(outDir,Mat1Name,"_",Mat2Name,"IdentifiedUniprotHomologousORFsLongMatch.tiff",sep=""), width = 480, height = 480, compression = c("none"), bg = "white")
+    p2
+    dev.off()
+}
+
+boxPlotIdentifiedUniprotHomologousORFsLengthRatio<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Name, outDir, upper)
+{
+    print(upper)
+    Mat1IdentifiedBlast=blastDB1[which(blastDB1[,'query_name'] %in% Mat1[,'protein.accession']),]
+    Mat2IdentifiedBlast=blastDB2[which(blastDB2[,'query_name'] %in% Mat2[,'protein.accession']),]
+    
+    Mat1IdenfiedORFsSub=blastFilterEval(blastFilterMatch(Mat1IdentifiedBlast,1),upper)[,c('query_length','hit_length')]
+    Mat2IdenfiedORFsSub=blastFilterEval(blastFilterMatch(Mat2IdentifiedBlast,1),upper)[,c('query_length','hit_length')]
+    Mat1IdenfiedORFsLengthRatio=Mat1IdenfiedORFsSub[,'query_length']/Mat1IdenfiedORFsSub[,'hit_length']
+    Mat2IdenfiedORFsLengthRatio=Mat2IdenfiedORFsSub[,'query_length']/Mat2IdenfiedORFsSub[,'hit_length']
+    maxLen=max(length(Mat1IdenfiedORFsLengthRatio), length(Mat2IdenfiedORFsLengthRatio))
+    length(Mat1IdenfiedORFsLengthRatio)=maxLen
+    length(Mat2IdenfiedORFsLengthRatio)=maxLen
+    mergedL=cbind(DB1=Mat1IdenfiedORFsLengthRatio,DB2=Mat2IdenfiedORFsLengthRatio)
+    colnames(mergedL)=c(Mat1Name, Mat2Name)
+    mergedL_melted = melt(mergedL)
+    colnames(mergedL_melted)=c('SerialNo','Software','LengthRatio')
+    print(maxLen)
+    ##box plot
+    p2 <- ggplot(mergedL_melted, aes( factor( Software ), LengthRatio, colour=Software ) ) +xlab("Database Source") + ylab("Length Ratio") + geom_boxplot() + ggtitle("Identified ORFs Length Ratio against the Uniprot")
+    tiff(filename = paste(outDir,Mat1Name,"_",Mat2Name,"IdentifiedUniprotHomologousORFsLengthRatio.tiff",sep=""), width = 480, height = 480, compression = c("none"), bg = "white")
+    p2
+    dev.off()
+}
+
+lengthComparison<-function(f1,f2,f3,f4,d1,d2,d3,d4,rev=1,peptide=1,pepThreshold=1, upper=0.1, Mat1Name, Mat2Name, outDir)
+{
+    Mats=readMatrices(f1,f2,f3,f4,d1,d2,d3,d4,rev,peptide,pepThreshold)
+    #boxPlotIdentifiedORFs(Mats$Mat1, Mats$Mat2, Mats$blastDB1, Mats$blastDB2,Mat1Name, Mat2Name, outDir)
+    #boxPlotIdentifiedUniprotHomologousORFsLongMatch(Mats$Mat1, Mats$Mat2, Mats$blastDB1, Mats$blastDB2,Mat1Name, Mat2Name, outDir, upper)
+    boxPlotIdentifiedUniprotHomologousORFsLengthRatio(Mats$Mat1, Mats$Mat2, Mats$blastDB1, Mats$blastDB2,Mat1Name, Mat2Name, outDir, upper)
+}
+
+### this code compares ORFs to Uniprot proteins blast result, where ORFs are generated from either trinity assebled transcripts or PASA assemblies.
 
 > dir="D:/data/blast/blastCSV/"
 > tFile="trinityV5.csv"

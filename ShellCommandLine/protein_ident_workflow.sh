@@ -193,7 +193,7 @@ java -Xms4024m -jar mzidentml-lib.jar ProteoGrouper I:\Human-Hendra\SearchEngine
 java -Xms4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th+grouping.mzid I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
 java -Xms4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th+grouping.mzid I:\Human-Hendra\SearchEngine\MSGF+\uniprot_human+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
 
-############################################# Human Adeno, PASA assembly ORFs   ################################################
+############################################# Human Adeno, PASA assembly ORFs ,  sORFs, shortest mainORF - 30bp, shortest uORF 24bp, longest 5` uORF - 600bp  ################################################
 I:\Human-Adenovirus\ProteinIdent
 java -Xmx12000M -jar MSGFPlus.jar -s /data/scratch/btw796/Data/HumanAdeno/MS/DM_from_raw.mgf -d  /data/scratch/btw796/Data/HumanAdeno/fasta/human_adeno_mydb_pasa.assemblies_ORFs_concatenated_target_decoy.fasta -o I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1.mzid -mod /data/scratch/btw796/Data/HumanAdeno/MS/modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8
 java -Xmx10024m -jar mzidentml-lib.jar FalseDiscoveryRate I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1.mzid I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true

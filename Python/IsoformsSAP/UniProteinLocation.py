@@ -83,6 +83,8 @@ def read(blastFileName, uniProteinFileName, newBlastFileName):
                         sys.exit();
                 else:
                     line.append("")
+                if line[0]=="Dataset_A_asmbl_43340_ORF4_Frame_2_26-313":
+                    print(line);
                 fileWriter.writerow(line)
             else:
                 line.append("Location")
@@ -90,4 +92,4 @@ def read(blastFileName, uniProteinFileName, newBlastFileName):
                 count=count+1
         #fileWriter.close()
 
-read('D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs.csv','D:/data/Data/uniprot-Homo+sapiens960613_04_2015.xls','D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV2.csv')
+read('D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs.csv','D:/data/Data/uniprot-Homo+sapiens960613_04_2015.xls','D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV3.csv')
