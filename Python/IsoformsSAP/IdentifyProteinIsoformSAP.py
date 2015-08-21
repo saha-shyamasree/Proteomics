@@ -3,6 +3,8 @@
 ###and uniprot proteins that is known proteins, a list of known proteins with SAPs/Alt/INDELs
 ###and a list of possible protein isoforms. These lists can then easily be read into R to check how
 ###many of these ORFs are identified from MS experient.
+
+###Need to add the ORF location field for later peptide evidence finding
 import os
 import csv
 import re
@@ -38,13 +40,13 @@ def lengthRatioCheck(qLen, sLen):
     else:
         return 0;
 
-def synonimousSAPs(seq1,seq2,seq3,delCount,varCount,aaVariationList,pos,sid,qid,chrm, alignInfo): #seq1 is query, seq2 is ref, seq3 is match from blast.
+def synonimousSAPs(seq1,seq2,seq3,delCount,insCount,varCount,aaVariationList,pos,sid,qid,chrm, alignInfo): #seq1 is query, seq2 is ref, seq3 is match from blast.
     match=re.finditer('\++',seq3);
     for m in match:
         if len(m.group(0))==1:
-            aaVariationList.append(AminoAcidVariation(sid, qid, pos+m.start(0)+1-delCount, seq2[m.start(0):m.end(0)], seq1[m.start(0):m.end(0)], "SSAP", chrm, varCount,alignInfo))
+            aaVariationList.append(AminoAcidVariation(sid, qid, pos+m.start(0)+1-delCount, pos+m.start(0)+1-insCount, seq2[m.start(0):m.end(0)], seq1[m.start(0):m.end(0)], "SSAP", chrm, varCount,alignInfo))
         else:
-            aaVariationList.append(AminoAcidVariation(sid, qid, pos+m.start(0)+1-delCount, seq2[m.start(0):m.end(0)], seq1[m.start(0):m.end(0)], "SALT", chrm, varCount,alignInfo))
+            aaVariationList.append(AminoAcidVariation(sid, qid, pos+m.start(0)+1-delCount, pos+m.start(0)+1-insCount, seq2[m.start(0):m.end(0)], seq1[m.start(0):m.end(0)], "SALT", chrm, varCount,alignInfo))
         varCount=varCount+1;
     return {'varList':aaVariationList,'varCount':varCount}
     
@@ -218,7 +220,9 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
         match=re.finditer('\s+',mSeq);
         prevM=None;
         varCount=1;
+        ## Here deletion is in respect to the query sequence, i.e. there is deletion in subject/reference sequence.But this event is called an insertion event in the vcf file
         deletionCount=0;
+        insertionCount=0;
         seqSt=0;
         for m in match:
             ##+ represents alternative amino acid. hence, that is part of alteration, not deletion. Whereas space may mean deletion or insertion or alteration from the query.
@@ -227,15 +231,17 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
                 sSeqPart=sSeq[0:m.start(0)];
                 mSeqPart=mSeq[0:m.start(0)];
                 pos=m.start(0); ## 1 is not added as we want the position before the begining of the INDEL.
+                qpos=m.start(0)
                 seqSt=0; # position is made 1 base in the synonimousSAPs function
             else:
                 qSeqPart=qSeq[prevM.end(0):m.start(0)];
                 sSeqPart=sSeq[prevM.end(0):m.start(0)];
                 mSeqPart=mSeq[prevM.end(0):m.start(0)];
                 pos=m.start(0)-deletionCount;# 1 is not added as we want the position before the begining of the INDEL.
+                qpos=m.start(0)-insertionCount;
                 seqSt=prevM.end(0);
             ##returns an array of SAPs, i.e. AminoAcidVariation objects and latest count of variations to populate 'ID' for the vcf like file.
-            retRes=synonimousSAPs(qSeqPart,sSeqPart,mSeqPart,deletionCount,varCount,aaVariationList,seqSt,sId,qId,chromosome, alignInfo);
+            retRes=synonimousSAPs(qSeqPart,sSeqPart,mSeqPart,deletionCount,insertionCount,varCount,aaVariationList,seqSt,sId,qId,chromosome, alignInfo);
             aaVariationList=retRes['varList'];
             varCount=retRes['varCount'];
             span=m.end(0)-m.start(0);
@@ -244,16 +250,17 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
                 if m.start(0)!=0:
                     ref=sSeq[m.start(0)-1] # -1 to get the index of the amino acid before the deletion location.
                     alt=qSeq[(m.start(0)-1):m.end(0)]
-                    aaVariationList.append(AminoAcidVariation(sId,qId,pos,ref,alt,"INS",chromosome,varCount,alignInfo))
+                    aaVariationList.append(AminoAcidVariation(sId,qId,pos,qpos,ref,alt,"INS",chromosome,varCount,alignInfo))
                     varCount=varCount+1;
                 else: 
                     print("INSERTION at the begining of the alignment!!!");
             else:
                 if qSeq[m.start(0):m.end(0)] == ("-"*span): # this is an event of deletion.
+                    insertionCount=insertionCount+span;
                     if m.start(0)!=0:
                         ref=sSeq[(m.start(0)-1):m.end(0)];
                         alt=qSeq[m.start(0)-1]
-                        aaVariationList.append(AminoAcidVariation(sId,qId,pos,ref,alt,"DEL",chromosome,varCount,alignInfo));
+                        aaVariationList.append(AminoAcidVariation(sId,qId,pos,qpos,ref,alt,"DEL",chromosome,varCount,alignInfo));
                         varCount=varCount+1;
                     else: 
                         print("DELETION at the begining of the alignment!!!");
@@ -265,14 +272,15 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
                         if "-" not in alt: #no deletion
                             ##all of these spaces are due to altered Amino acids
                             if len(ref)>1:
-                                aaVariationList.append(AminoAcidVariation(sId,qId,pos+1,ref,alt,"ALT",chromosome,varCount,alignInfo)); # 1 is added because spaces are not representing INDELs here, so we need the start location of the event
+                                aaVariationList.append(AminoAcidVariation(sId,qId,pos+1,qpos+1,ref,alt,"ALT",chromosome,varCount,alignInfo)); # 1 is added because spaces are not representing INDELs here, so we need the start location of the event
                                 varCount=varCount+1;
                             else:
-                                aaVariationList.append(AminoAcidVariation(sId,qId,pos+1,ref,alt,"SAP",chromosome,varCount,alignInfo));# 1 is added because spaces are not representing INDELs here, so we need the start location of the event
+                                aaVariationList.append(AminoAcidVariation(sId,qId,pos+1,qpos+1,ref,alt,"SAP",chromosome,varCount,alignInfo));# 1 is added because spaces are not representing INDELs here, so we need the start location of the event
                                 varCount=varCount+1;
-                        else: # mixture of deletion and alteration. So deletionCount does not change.                            
+                        else: # mixture of deletion and alteration. So deletionCount does not change. insertionCount change                            
                             ins=re.finditer('\-+',alt);
                             prevIns=None;
+                            intInsCount=0;
                             for i in ins:
                                 if i.start(0)!=0:
                                     if prevIns==None:
@@ -285,29 +293,33 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
                                     altPart2=alt[(i.start(0)-1)];
                                     stPart2=i.start(0); #1 is not added because we want the position-1 of the current event because its event if deletion
                                     if len(refPart1)==1:
-                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+1,refPart1,altPart1,"SAP",chromosome,varCount,alignInfo));# 1 is added because these are the characters before spaces. where we need the start location of the event
+                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+1, qpos+1,refPart1,altPart1,"SAP",chromosome,varCount,alignInfo));# 1 is added because these are the characters before spaces. where we need the start location of the event
                                         varCount=varCount+1;
                                     else:
-                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+1,refPart1,altPart1,"ALT",chromosome,varCount,alignInfo)); # 1 is added because these are the characters before spaces. where we need the start location of the event
+                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+1,qpos+1,refPart1,altPart1,"ALT",chromosome,varCount,alignInfo)); # 1 is added because these are the characters before spaces. where we need the start location of the event
                                         varCount=varCount+1;
                                     if len(refPart2)==1:
-                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+stPart2,refPart2,altPart2,"SAP",chromosome,varCount,alignInfo));
+                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+stPart2,qpos+stPart2-intInsCount,refPart2,altPart2,"SAP",chromosome,varCount,alignInfo));
                                         varCount=varCount+1;
                                     else:
-                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+stPart2,refPart2,altPart2,"DEL",chromosome,varCount,alignInfo));
+                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+stPart2,qpos+stPart2-intInsCount,refPart2,altPart2,"DEL",chromosome,varCount,alignInfo));
                                         varCount=varCount+1;
+                                    insertionCount=insertionCount+len(i.group(0))
+                                    intInsCount=intInsCount+len(i.group(0))
                                 else:
                                     sp=i.end(0)-i.start(0);
                                     refPart=sSeq[m.start(0)-1:(m.start(0)+sp)]
                                     altPart=qSeq[m.start(0)-1];
-                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos,refPart,altPart,"DEL",chromosome,varCount,alignInfo));
+                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos,qpos,refPart,altPart,"DEL",chromosome,varCount,alignInfo));
                                     varCount=varCount+1;
+                                    insertionCount=insertionCount+len(i.group(0))
+                                    intInsCount=intInsCount+len(i.group(0))
                                 prevIns=i;
                             if prevIns!=None:
                                 if prevIns.end(0)<len(ref):
                                     refPart=ref[prevIns.end(0):]
                                     altPart=alt[prevIns.end(0):]
-                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos+1+prevIns.end(0),refPart,altPart,"ALT",chromosome,varCount,alignInfo));
+                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos+1+prevIns.end(0),qpos+1+prevIns.end(0)-intInsCount,refPart,altPart,"ALT",chromosome,varCount,alignInfo));
                                     varCount=varCount+1;
                             else:
                                 print("ERROR: This should not happen: when alt contains '-'");
@@ -328,11 +340,11 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
                                     altPart2=alt[(i.start(0)-1):i.end(0)];
                                     stPart2=i.start(0)-intDelCount;
                                     if len(refPart1)==1:
-                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+1-intDelCount,refPart1,altPart1,"SAP",chromosome,varCount,alignInfo));# 1 is added because these are the characters before spaces. where we need the start location of the event
+                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+1-intDelCount,qpos+1,refPart1,altPart1,"SAP",chromosome,varCount,alignInfo));# 1 is added because these are the characters before spaces. where we need the start location of the event
                                     else:
-                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+1-intDelCount,refPart1,altPart1,"ALT",chromosome,varCount,alignInfo));# 1 is added because these are the characters before spaces. where we need the start location of the event
+                                        aaVariationList.append(AminoAcidVariation(sId,qId,pos+1-intDelCount,qpos+1,refPart1,altPart1,"ALT",chromosome,varCount,alignInfo));# 1 is added because these are the characters before spaces. where we need the start location of the event
                                     varCount=varCount+1;
-                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos+stPart2,refPart2,altPart2,"INS",chromosome,varCount,alignInfo));
+                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos+stPart2,qpos+i.start(0),refPart2,altPart2,"INS",chromosome,varCount,alignInfo));
                                     varCount=varCount+1;
                                     deletionCount=deletionCount+len(i.group(0))
                                     intDelCount=intDelCount+len(i.group(0));
@@ -340,7 +352,7 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
                                     sp=i.end(0)-i.start(0);
                                     refPart=sSeq[m.start(0)-1]
                                     altPart=qSeq[m.start(0)-1:(m.start(0)+sp)];
-                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos,refPart,altPart,"INS",chromosome,varCount,alignInfo));
+                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos,qpos,refPart,altPart,"INS",chromosome,varCount,alignInfo));
                                     varCount=varCount+1;
                                     deletionCount=deletionCount+len(i.group(0));
                                     intDelCount=intDelCount+len(i.group(0));
@@ -350,7 +362,7 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
                                 if prevDel.end(0)<len(alt):
                                     altPart=alt[prevDel.end(0):];
                                     refPart=ref[prevDel.end(0):];
-                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos+1+prevDel.end(0)-intDelCount,refPart,altPart,"ALT",chromosome,varCount,alignInfo));
+                                    aaVariationList.append(AminoAcidVariation(sId,qId,pos+1+prevDel.end(0)-intDelCount,qpos+1+prevDel.end(0),refPart,altPart,"ALT",chromosome,varCount,alignInfo));
                                     varCount=varCount+1;
                             else:
                                 print("ERROR: This should not happen: when ref contains '-'");
@@ -369,7 +381,7 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
             sSeqPart=sSeq;
             mSeqPart=mSeq;
             pos=0; # position is made 1 base in the synonimousSAPs function
-        retRes=synonimousSAPs(qSeqPart,sSeqPart,mSeqPart,deletionCount,varCount,aaVariationList,pos,sId,qId,chromosome, alignInfo);
+        retRes=synonimousSAPs(qSeqPart,sSeqPart,mSeqPart,deletionCount,insertionCount,varCount,aaVariationList,pos,sId,qId,chromosome, alignInfo);
         aaVariationList=retRes['varList'];
         varCount=retRes['varCount'];
         #printVariationList(aaVariationList);
@@ -428,6 +440,8 @@ def classify(line, matchCol, evalTheshold,evalCol, gTh, gCol, lCol, qLenCol, sLe
                 print(line[qId]+" has poor alignment quality, quality:"+line[gCol]);
         else:
             print(line[qId]+" did not pass e-value threshold.")
+    else:
+        print(line[qId]+" does not have a map to a Uniprot protein")
 
 def read(filename, matchCol, evalTheshold, evalCol, gTh, gCol, lCol, qLenCol, sLenCol, qSeqCol, sSeqCol, mSeqCol, qSt, qEnd, sSt, sEnd, sId, qId, chromosome, SAPFileName, knownProteinFileName, knownProteinSAPFileName, isoformsFileName, isoformsSAPsFileName):
     with open(filename, newline='') as csvfile, open(SAPFileName, 'w', newline='') as SAPFile, open(knownProteinFileName, 'w', newline='') as knownProteinFile, open(knownProteinSAPFileName, 'w', newline='') as knownProteinSAPFile, open(isoformsFileName, 'w', newline='') as isoformsFile, open(isoformsSAPsFileName, 'w', newline='') as isoformsSAPsFile:
@@ -441,7 +455,7 @@ def read(filename, matchCol, evalTheshold, evalCol, gTh, gCol, lCol, qLenCol, sL
         isoformsFile.write("ORF Id, Protein ID, Type\n");
         isoformsSAPsFile.write("ORF Id, Protein ID, Type\n");
         for line in reader:
-            print("line length:"+str(len("".join(line))))
+            #print("line length:"+str(len("".join(line))))
             if count>0:
                 #print("classify called");
                 classify(line, matchCol, evalTheshold,evalCol, gTh, gCol, lCol, qLenCol, sLenCol, qSeqCol, sSeqCol, mSeqCol, qSt, qEnd, sSt, sEnd, sId, qId, chromosome, SAPFile, count, knownProteinFile, knownProteinSAPFile, isoformsFile, isoformsSAPsFile)
@@ -450,11 +464,11 @@ def read(filename, matchCol, evalTheshold, evalCol, gTh, gCol, lCol, qLenCol, sL
                 count=count+1
 
 filename="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV3.csv"
-SAPFileName="human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV6.vcf"
-knownProteinFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsV6.csv"
-knownProteinSAPFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsSAPsV6.csv"
-isoformsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV6.csv"
-isoformsSAPsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV6.csv"
+SAPFileName="human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
+knownProteinFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsV7.csv"
+knownProteinSAPFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsSAPsV7.csv"
+isoformsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV7.csv"
+isoformsSAPsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV7.csv"
 matchCol=2
 evalTheshold=0.000000000000000000000000000001
 evalCol=6

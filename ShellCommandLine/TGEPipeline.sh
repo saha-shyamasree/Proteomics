@@ -59,6 +59,17 @@ do
         echo "Trinity --seqType fq --JM 30G --left $file --right $file2 --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/$sample --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
     fi
 done
+##run G8[1258] samples.
+for file in "$dir"G8[1258]_1.*
+do
+    if [ -f $file ]; then
+        #echo $file
+        file2=$(echo $file | sed -e "s/_1/_2/g")
+        #echo $file2
+        sample=$(basename $file | sed -e "s/_1.fastq.gz//g")
+        echo "Trinity --seqType fq --JM 30G --left $file --right $file2 --SS_lib_type FR --CPU 6 --trimmomatic --normalize_reads --output /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/$sample --full_cleanup" | qsub -cwd -V -l h_vmem=80G -l h_rt=72:0:0
+    fi
+done
 
 ## remove the trinity directories
 dir='/data/SBCS-BessantLab/shyama/Data/Oliver/RNA/'

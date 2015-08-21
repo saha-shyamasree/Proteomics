@@ -1,10 +1,11 @@
 
 class AminoAcidVariation:
     """This clas holds aminoacid variations from blast alignment"""
-    def __init__(self,subjectId, queryId, start, refSeq, altSeq, Type, chrm, vid, info):
+    def __init__(self,subjectId, queryId, start, qpos, refSeq, altSeq, Type, chrm, vid, info):
         self.subjectId=subjectId
         self.queryId=queryId
         self.pos=start
+        self.qpos=qpos
         self.ref=refSeq
         self.alt=altSeq
         self.type=Type
@@ -36,13 +37,15 @@ class AminoAcidVariation:
     def setALT(self,Type):
         self.type=Type
     def toString(self):
+        prefix=0
+        qPrefix=0
         if int(self.alingmentInfo['subjectStart'])!=1:
             prefix=int(self.alingmentInfo['subjectStart'])-1;
-            return self.chr+"\t"+str(self.pos+prefix)+"\t"+str(self.alingmentInfo['qSerialNo'])+"."+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"SubjectId="+self.subjectId+";QueryId="+self.queryId.replace(';','&')+";Alignment=[QueryLength="+self.alingmentInfo['qLen']+":QueryStart="+self.alingmentInfo['queryStart']+":QueryEnd="+self.alingmentInfo['queryEnd']+":SubjectLength="+self.alingmentInfo['sLen']+":SubjectStart="+self.alingmentInfo['subjectStart']+":SubjectEnd="+self.alingmentInfo['subjectEnd']+"];Type:"+self.type;
-        else:
-            return self.chr+"\t"+str(self.pos)+"\t"+str(self.alingmentInfo['qSerialNo'])+"."+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"SubjectId="+self.subjectId+";QueryId="+self.queryId.replace(';','&')+";Alignment=[QueryLength="+self.alingmentInfo['qLen']+":QueryStart="+self.alingmentInfo['queryStart']+":QueryEnd="+self.alingmentInfo['queryEnd']+":SubjectLength="+self.alingmentInfo['sLen']+":SubjectStart="+self.alingmentInfo['subjectStart']+":SubjectEnd="+self.alingmentInfo['subjectEnd']+"];Type:"+self.type;
+        if int(self.alingmentInfo['queryStart'])!=1:
+            qPrefix=int(self.alingmentInfo['queryStart'])-1;
+        return self.chr+"\t"+str(self.pos+prefix)+"\t"+str(self.alingmentInfo['qSerialNo'])+"."+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"SubjectId="+self.subjectId+";QueryId="+self.queryId.replace(';','&')+";Alignment=[QueryLength="+self.alingmentInfo['qLen']+":QueryStart="+self.alingmentInfo['queryStart']+":QueryEnd="+self.alingmentInfo['queryEnd']+":SubjectLength="+self.alingmentInfo['sLen']+":SubjectStart="+self.alingmentInfo['subjectStart']+":SubjectEnd="+self.alingmentInfo['subjectEnd']+"];Type:"+self.type+";QPOS:"+str(self.qpos+qPrefix);
     def printVar(self):
-        print(self.chr+"\t"+str(self.pos)+"\t"+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"ProtId:"+self.subjectId+";ORFId:"+self.queryId.replace(';','&')+";Type:"+self.type)
+        print(self.chr+"\t"+str(self.pos)+"\t"+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+"ProtId:"+self.subjectId+";ORFId:"+self.queryId.replace(';','&')+";Type:"+self.type+";QPOS:"+str(self.qpos))
     @staticmethod
     def printHeader():
         return "#Chr\tPOS within Protein\tID\tREF\tALT\tINFO"
