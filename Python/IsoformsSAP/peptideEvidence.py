@@ -30,7 +30,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
     prevPeptide=''
     prevFound=0
     PSMEvidence=pd.DataFrame();
-    for i in 0:len(PSMsOfORF):
+    for i in range(0,len(PSMsOfORF)):
         protAcc=PSMsOfORF.iloc[i]['proteinacc_start_stop_pre_post_;']
         if prevPeptide!=protAcc:
             ## Check whether this PSM covers the location of the variation.
@@ -99,7 +99,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                                 position=0
                                 positionEnd=altEnd-int(proacc_start_stop_pre_postList.group(2))+1
                                 altIdx=altStart-int(proacc_start_stop_pre_postList.group(2))
-                                if variation['ALT'][altIdx:]==PSMsOfORF.iloc[i]['Sequence'][position:positionEnd]
+                                if variation['ALT'][altIdx:]==PSMsOfORF.iloc[i]['Sequence'][position:positionEnd]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Partial'})),ignore_index=True)
                                 else:
@@ -108,7 +108,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                                 ## Partial match
                                 position=altStart-int(proacc_start_stop_pre_postList.group(2))
                                 altEndIdx=int(proacc_start_stop_pre_postList.group(3))-altStart
-                                if variation['ALT'][0:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][position:]
+                                if variation['ALT'][0:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][position:]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Partial'})),ignore_index=True)
                                 else:
@@ -137,7 +137,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                                 positionEnd=altEnd-int(proacc_start_stop_pre_postList.group(2))+1
                                 ## part of the variation['ALT'] will be missing
                                 altIdx=altStart-int(proacc_start_stop_pre_postList.group(2))
-                                if variation['ALT'][altIdx:]==PSMsOfORF.iloc[i]['Sequence'][position:positionEnd]
+                                if variation['ALT'][altIdx:]==PSMsOfORF.iloc[i]['Sequence'][position:positionEnd]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Partial'})),ignore_index=True)
                                 else:
@@ -146,7 +146,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                                 ## Partial match
                                 position=altStart-int(proacc_start_stop_pre_postList.group(2))
                                 altEndIdx=int(proacc_start_stop_pre_postList.group(3))-altStart
-                                if variation['ALT'][0:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][position:]
+                                if variation['ALT'][0:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][position:]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Partial'})),ignore_index=True)
                                 else:
@@ -191,7 +191,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                                 ## Partial match
                                 position=altStart-int(proacc_start_stop_pre_postList.group(2))
                                 altEndIdx=int(proacc_start_stop_pre_postList.group(3))-altStart
-                                if variation['REF'][0:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][position:] or variation['REF'][1:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][(position+1):]
+                                if variation['REF'][0:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][position:] or variation['REF'][1:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][(position+1):]:
                                     print(variation['ID']+" DEL event event has peptide covering the position, but the peptide is partially supporting the reference sequence:"+PSMsOfORF.iloc[i]['Sequence'])
                                 elif variation['ALT']==PSMsOfORF.iloc[i]['Sequence'][position]:
                                     prevFound=1
@@ -211,7 +211,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
             if prevFound==1:
                 ##this means prevPeptide was counted as an evidence of the variaton. Hence this PSM should also
                 ##be counted.
-                PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':PSMsOfORF.iloc[i-1]['Evidence'])),ignore_index=True)
+                PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':PSMsOfORF.iloc[i-1]['Evidence']})),ignore_index=True)
             else:
                 print(variation['ID']+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
     return PSMEvidence
@@ -233,15 +233,45 @@ def groupPeptide(peptideGrouped, ORFId):
     return PSMsList
 
 def addVariationInfoToPSM(PSMsOfVariation, variation):
-    
-
-def printPSMsOfVariation(PSMsOfVariations, variation, newPSMFile):
-    ##this is PSM wise view
     ## Add ORFId and variation information.
-    newPSMFile
-    
-def printValidatedVariations(PSMsOfVariations, variation):
+    varInf={'ORFID':variation['QueryID'],'SubjectID':variation['SubjectID'],'variationID':variation['ID'],'variationType':variation['Type'],'Location':variation['QPOS']}
+    lenPSMVar=len(PSMsOfVariations)
+    writeDF=pd.concat([PSMsOfVariations,pd.DataFrame([varInf]*lenPSMVar,index=range(lenPSMVar))],axis=1)
+    return writeDF
+
+def printPSMsOfVariation(writeDF, newPSMFile, headerFlag):
+    ##this is PSM wise view
+    if headerFlag==1:
+        ## Write column names
+        writeDF.to_csv(newPSMFile, index=False)
+    else:
+        writeDF.to_csv(newPSMFile, header=False, index=False)
+
+def calculateQualityScore(PSMsOfVariation,featureWeights):
+    ## For time being this function returns 1, but in future I need to figure out a formula to represent the confidence of peptide evidences supporting a variation.
+    return 1
+
+def addPSMInfoToVariation(variation, PSMsOfVariation):
+    ##Add PSM count, Peptide count, possibly an average score indicating PSM/peptide quality.
+    ##For time being quality score is 1.
+    score=calculateQualityScore(PSMsOfVariation,1)
+    ## Number of PSMs
+    PSMCount=len(PSMsOfVariation['PSM_ID'].unique())
+    ## Number of peptide sequences
+    peptideCount=len(PSMsOfVariation['Sequence'].unique())
+    ## Unique peptides
+    unqPeptides=",".join(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique())
+    ## Count of peptide sequences that uniquely map to this ORF/Protein
+    unqPeptideCount=(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';')).sum() ##~ is doing the job of negation, i.e. does not contain. This means the peptide is not shared with other proteins
+    PSMInfo={'PSMCount':PSMCount,'PeptideCount':peptideCount,'UniquePeptideCount':unqPeptideCount,'UniquePeptide':unqPeptides,'ConfidenceScore':score}
+
+def printValidatedVariations(variation, newVcfFile, headerFlag):
     ##This is another vcf
+    if headerFlag==1:
+        newVcfFile.write("#Chr\tPOS within Protein\tID\tREF\tALT\tINFO")
+    for i in range(len(variation)):
+        ##SubjectID','QueryID','Alignment','Type','QPOS'
+        newVcfFile.write(variation.iloc[i]['#Chr']+"\t"+str(variation.iloc[i]['POS within Protein'])+"\t"+str(variation.iloc[i]['ID'])+"\t"+variation.iloc[i]['REF']+"\t"+variation.iloc[i]['ALT']+"\t"+"SubjectId="+variation.iloc[i]['SubjectID']+";QueryId="+variation.iloc[i]['QueryID'].replace(',','&')+";Alignment=["+variation.iloc[i]['Alignment']+"];Type:"+variation.iloc[i]['Type']+";QPOS:"+str(variation.iloc[i]['QPOS'])+";PeptideCount:"+str(variation.iloc[i]['PeptideCount'])+";UniquePeptideCount:"+str(variation.iloc[i]['UniquePeptideCount'])+";Peptides:"+variation.iloc[i]['UniquePeptide']+";Score:"+variation.iloc[i]['ConfidenceScore']+"\n")
 
 def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
     ## vcf file fields: Chr, POS within Protein,ID, REF, ALT, INFO(SubjectId=P09417-2;QueryId=Dataset_A_asmbl_41426_ORF20_Frame_3_84-446;Alignment=[QueryLength=121:QueryStart=1:QueryEnd=116:SubjectLength=213:SubjectStart=1:SubjectEnd=116];Type:SSAP;QPOS:116)
@@ -250,16 +280,17 @@ def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
     vcf=vcf.drop('INFO',1)
     vcf=vcf.join(info)
     vcf.SubjectID=vcf.SubjectID.str.replace('SubjectId=','')
-    vcf.QueryID=vcf.QueryID.str.replace('QueryID=','')
-    vcf.Alignment=vcf.Alignment.str.replace('Alignment=[','')
-    vcf.Alignment=vcf.Alignment.str.replace(']','')
+    vcf.QueryID=vcf.QueryID.str.replace('QueryId=','')
+    print(vcf.QueryID[0:5])
+    vcf.Alignment=vcf.Alignment.str.replace('Alignment=\[','')
+    vcf.Alignment=vcf.Alignment.str.replace('\]','')
     ##groups vcf entries by ORF/Query ids.
     vcfGrouped=vcf.groupby('QueryID')
     
     ##in the same way group the PSMs according to the prptide sequence.
     peptideGrouped=PSMs.groupby('Sequence')
     # each of these group represents all the SAPs/ALTs/INDELs for a ORF/Query
-    
+    headerFlag=1
     for name, variations in vcfGrouped:
         ## check whether this ORF has been identified and whether this SAP/ALT/INDEL event has a peptide evidence.
         ## the ORF id contained ',' which was replaced by ';' in contigStat.pl as this code produce comma separated file. Later
@@ -271,17 +302,21 @@ def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
         PSMsOfORF=groupPeptide(peptideGrouped, ORFId)
         if len(PSMsOfORF)>0:    
             ##For each entry in the query, which is essentially the variations, check overlap between the variation and these peptide.
-            for index, variation in variations:
-                ## Match 
+            for i in range(len(variations)):
+                variation=variations.iloc[i]
+                ## Match
                 PSMsOfVariations=checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation)
                 if len(PSMsOfVariations)>0:
-                    printPSMsOfVariation(PSMsOfVariations, variation, newPSMFile)
-                    printValidatedVariations(PSMsOfVariations, variation, newVcfFile)
+                    PSMsOfVariation=addVariationInfoToPSM(PSMsOfVariation, variation)
+                    variation=addPSMInfoToVariation(variation, PSMsOfVariation)
+                    printPSMsOfVariation(PSMsOfVariations, newPSMFile,headerFlag)
+                    printValidatedVariations(variation, newVcfFile,headerFlag)
+                    headerFlag=0
                 else:
-                    print(variation+" does not have peptide evidence")
+                    print(variation['ID']+" does not have peptide evidence")
         else:
             print(ORFId+" was not identified")
-    
+
 def readFile(filename, sep):
     fileDFObj = pd.read_table(filename, sep=sep)
     return fileDFObj;
@@ -293,8 +328,14 @@ def main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName):
     vcf=readFile(vcfFileName,'\t')
     ##for each entry in the vcf try find peptides that overlaps the vcf entry location. For deletion event, it might
     ##be little tricky. Not finding any peptide for deletion event is a good sign but does not confirms the deletion.
-    with open(newVcfFileName) as newVcfFile, open(newPSMFileName) as newPSMFile:
+    with open(newVcfFileName, 'w') as newVcfFile, open(newPSMFileName, 'w') as newPSMFile:
         findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile)
     
-PSMFileName="D:\data\Results\Human-Adeno\Identification\PASA\sORF\pasa_assemblyV1+fdr+th+grouping.csv"
-vcfFileName="D:\data\blast\blastCSV\PASA\Human-Adeno\human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
+PSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+grouping.csv"
+vcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
+
+## New Files
+newPSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+groupingVariationEvidence.csv"
+newVcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7PeptideEvidence.vcf"
+
+main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName)
