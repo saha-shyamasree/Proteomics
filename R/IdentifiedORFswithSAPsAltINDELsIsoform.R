@@ -46,11 +46,31 @@ knownSAPIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_knownSAP
 isoformIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_isoformProteinsV2.tsv")
 isoformSAPsIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_isoformSAPsProteinsV2.tsv")
 
+################################# 24-08-2015 ##############################################
+#### PASA assembly for human adenovirus
+
+##File Paths and other thresholding values
+identifiedORFsDir="D:/data/Results/Human-Adeno/Identification/PASA/sORF/"
+identifiedORFsFilename="pasa_assemblyV1+fdr+th+grouping+prt.csv"
+
+knownProteinPath="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsV7.csv"
+knownProteinSAPPath="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsSAPsV7.csv"
+isoformPath="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV7.csv"
+isoformSAPsPath="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV7.csv"
+
+knownIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_knownProteinsV7.tsv")
+knownSAPIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_knownSAPProteinsV7.tsv")
+isoformIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_isoformProteinsV7.tsv")
+isoformSAPsIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_isoformSAPsProteinsV7.tsv")
+
+
 blastFile="human_adeno_mydb_pasa.assemblies_ORFsV1.csv"
-blastDir="D:/data/blast/blastCSV/"
+blastDir="D:/data/blast/blastCSV/PASA/Human-Adeno/"
 upper=0.000000000000000000000000000001
 
-##Reading matrices
+######################################    Reading matrices   ###############################################################
+
+
 identifiedORFs=proteinGrpFilterReplaceIds(identifiedORFsFilename,identifiedORFsDir,blastFile,blastDir,1,1,1,upper)
 knownProteinList=readList(knownProteinPath)
 knownProteinSAPList=readList(knownProteinSAPPath)

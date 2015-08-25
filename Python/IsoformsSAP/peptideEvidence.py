@@ -32,12 +32,13 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
     PSMEvidence=pd.DataFrame();
     for i in range(0,len(PSMsOfORF)):
         protAcc=PSMsOfORF.iloc[i]['proteinacc_start_stop_pre_post_;']
-        if prevPeptide!=protAcc:
+        pepSeq=PSMsOfORF.iloc[i]['Sequence']
+        if prevPeptide!=pepSeq:
             ## Check whether this PSM covers the location of the variation.
             ## If yes, compare the peptide sequence and the variation sequence to make sure the peptide does
             ## support the variation.
             ## Split the protId, get start and end and compare with the loc. Check the sequence, compare with altSeq.
-            prevPeptide=protAcc;
+            prevPeptide=pepSeq;
             ## prevFound flag is reset here. Because prevPeptide is not same as current one, therefore the PSM has not been
             ## added to the PSMRvidence yet.
             prevFound=0
@@ -45,38 +46,49 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
             proacc_start_stop_pre_post=[s for s in protList if ORFId in s] #this should always have one element.
             if len(proacc_start_stop_pre_post)==1:
                 ##this should always be the case.
-                pattern=re.compile('(.*)?-(\d+)_(\d+)_(\d+)_([A-Z]|-)_([A-Z]|-)')
-                match=pattern.finditer(proacc_start_stop_pre_post[0])
+                startEndPrePost=proacc_start_stop_pre_post[0].replace(ORFId,'')
+                print("start end pre post:"+startEndPrePost)
+                pattern=re.compile('_(\d+)_(\d+)_([A-Z]|-)_([A-Z]|-)')
+                match=pattern.finditer(startEndPrePost)
                 count=0
                 for m in match:
                     ##this loop should run only once.
                     proacc_start_stop_pre_postList=m
                     if count>0:
                         ##ERROR
-                        print("ERROR: Match object should have single value.")
+                        print("ERROR: Match object should have single value."+protAcc)
+                        print("ORFId:"+ORFId)
+                        print("proacc_start_stop_pre_postList:"+proacc_start_stop_pre_postList.groups())
                         count=count+1;
                         break;
                     count=count+1;
                 ## this is what should happen
+                #print("Count:"+str(count))
                 if count==1:
                     ## Check whether location of the SAP/ALT/INDEL is covered by this peptide.
                     ## For SAPs its straight forward. 
                     ## It might happen that for ALT/INDELs the peptide covers the event partially.
+                    print("Count:"+str(count))
                     if variation['Type']=='SAP' or variation['Type']=='SSAP':
-                        if int(proacc_start_stop_pre_postList.group(2))<=int(variation['QPOS']) and int(variation['QPOS'])<=int(proacc_start_stop_pre_postList.group(3)):
+                        #print("Var type S/SAP")
+                        print("proacc start-end:"+str(proacc_start_stop_pre_postList.group(1))+"-"+str(proacc_start_stop_pre_postList.group(2)))
+                        print("var loc="+variation['QPOS'])
+                        if int(proacc_start_stop_pre_postList.group(1))<=int(variation['QPOS']) and int(variation['QPOS'])<=int(proacc_start_stop_pre_postList.group(2)):
                             ##this peptide is possibly an evidence of the SAP.
                             ## Both vcf location and the protein identification locations (at least for MSGF+)
                             ## are 1 base.But pythonic indexes are 0 based.
-                            position=int(variation['QPOS'])-int(proacc_start_stop_pre_postList.group(2))
+                            position=int(variation['QPOS'])-int(proacc_start_stop_pre_postList.group(1))
+                            print("1. Overlap")
                             if variation['ALT']==PSMsOfORF.iloc[i]['Sequence'][position]:
                                 ## The peptide supports the SAP/SSAP.
                                 ## add this proof to the matrix
                                 prevFound=1
                                 PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Full'})),ignore_index=True)
+                                print("1.pep found:"+PSMEvidence)
                             else:
-                                print(variation['ID']+" SAP/SSAP event event has peptide covering the position, but AA is not same. peptide :"+PSMsOfORF.iloc[i]['Sequence'])
+                                print(str(variation['ID'])+" SAP/SSAP event event has peptide covering the position, but AA is not same. peptide :"+PSMsOfORF.iloc[i]['Sequence'])
                         else:
-                            print(variation['ID']+": This SAP/SSAP is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
+                            print(str(variation['ID'])+": This SAP/SSAP is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
                     else:
                         if variation['Type']=='ALT' or variation['Type']=='SALT':
                             ## The Alteration event might have partial peptide coverage.
@@ -84,75 +96,87 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                             altEnd=int(variation['QPOS'])+len(variation['ALT'])-1
                             ## Check whether this identified peptide overlaps with this alteration event.
                             ## The overlap can either be full or partial overlap.
-                            if int(proacc_start_stop_pre_postList.group(2))<=altStart and altEnd<=int(proacc_start_stop_pre_postList.group(3)):
+                            if int(proacc_start_stop_pre_postList.group(1))<=altStart and altEnd<=int(proacc_start_stop_pre_postList.group(2)):
                                 ##this means the alteration event is fully covered by the peptide.
                                 ##pythonic indexes are 0 based.
-                                position=int(variation['QPOS'])-int(proacc_start_stop_pre_postList.group(2))
+                                position=int(variation['QPOS'])-int(proacc_start_stop_pre_postList.group(1))
                                 altLength=len(variation['ALT'])
+                                print("2. Overlap")
                                 if variation['ALT']==PSMsOfORF.iloc[i]['Sequence'][position:(position+altLength)]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Full'})),ignore_index=True)
+                                    print("2.pep found")
                                 else:
-                                    print(variation['ID']+" ALT/SALT event event has peptide covering the position, but AA is not same. peptide :"+PSMsOfORF.iloc[i]['Sequence'])
-                            elif int(proacc_start_stop_pre_postList.group(2))>=altStart and altEnd>=int(proacc_start_stop_pre_postList.group(2)) and altEnd<=int(proacc_start_stop_pre_postList.group(3)):
+                                    print(str(variation['ID'])+" ALT/SALT event event has peptide covering the position, but AA is not same. peptide :"+PSMsOfORF.iloc[i]['Sequence'])
+                            elif int(proacc_start_stop_pre_postList.group(1))>=altStart and altEnd>=int(proacc_start_stop_pre_postList.group(1)) and altEnd<=int(proacc_start_stop_pre_postList.group(2)):
                                 ## Partial peptide coverage
                                 position=0
-                                positionEnd=altEnd-int(proacc_start_stop_pre_postList.group(2))+1
-                                altIdx=altStart-int(proacc_start_stop_pre_postList.group(2))
+                                positionEnd=altEnd-int(proacc_start_stop_pre_postList.group(1))+1
+                                altIdx=altStart-int(proacc_start_stop_pre_postList.group(1))
+                                print("3. Overlap")
                                 if variation['ALT'][altIdx:]==PSMsOfORF.iloc[i]['Sequence'][position:positionEnd]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Partial'})),ignore_index=True)
+                                    print("3.pep found")
                                 else:
-                                    print(variation['ID']+" ALT/SALT event event has peptide covering the position, but AA is not same. peptide :"+PSMsOfORF.iloc[i]['Sequence'])
-                            elif int(proacc_start_stop_pre_postList.group(2))<=altStart and altStart<=int(proacc_start_stop_pre_postList.group(3)) and altEnd>=int(proacc_start_stop_pre_postList.group(3)):
+                                    print(str(variation['ID'])+" ALT/SALT event event has peptide covering the position, but AA is not same. peptide :"+PSMsOfORF.iloc[i]['Sequence'])
+                            elif int(proacc_start_stop_pre_postList.group(1))<=altStart and altStart<=int(proacc_start_stop_pre_postList.group(2)) and altEnd>=int(proacc_start_stop_pre_postList.group(2)):
                                 ## Partial match
-                                position=altStart-int(proacc_start_stop_pre_postList.group(2))
-                                altEndIdx=int(proacc_start_stop_pre_postList.group(3))-altStart
+                                position=altStart-int(proacc_start_stop_pre_postList.group(1))
+                                altEndIdx=int(proacc_start_stop_pre_postList.group(2))-altStart
+                                print("4. Overlap")
                                 if variation['ALT'][0:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][position:]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Partial'})),ignore_index=True)
+                                    print("4.pep found")
                                 else:
-                                    print(variation['ID']+":This ALT/SALT event has peptide covering the position, but AA is not same. Peptide :"+PSMsOfORF.iloc[i]['Sequence'])
+                                    print(str(variation['ID'])+":This ALT/SALT event has peptide covering the position, but AA is not same. Peptide :"+PSMsOfORF.iloc[i]['Sequence'])
                             else:
-                                print(variation['ID']+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
+                                print(str(variation['ID'])+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
                         elif variation['Type']=='INS':
                             ## Insertion event. This might have partial or full peptide coverage as the alteration events.
                             altStart=int(variation['QPOS'])
                             altEnd=int(variation['QPOS'])+len(variation['ALT'])-1
                             ## Check whether this identified peptide overlaps with this insertion event.
                             ## The overlap can either be full or partial overlap.
-                            if int(proacc_start_stop_pre_postList.group(2))<=altStart and altEnd<=int(proacc_start_stop_pre_postList.group(3)):
+                            if int(proacc_start_stop_pre_postList.group(1))<=altStart and altEnd<=int(proacc_start_stop_pre_postList.group(2)):
                                 ##this means the insertion event is fully covered by the peptide.
                                 ##pythonic indexes are 0 based.
-                                position=int(variation['QPOS'])-int(proacc_start_stop_pre_postList.group(2))
+                                position=int(variation['QPOS'])-int(proacc_start_stop_pre_postList.group(1))
                                 altLength=len(variation['ALT'])
+                                print("5. Overlap")
                                 if variation['ALT']==PSMsOfORF.iloc[i]['Sequence'][position:(position+altLength)]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Full'})),ignore_index=True)
+                                    print("5.pep found")
                                 else:
-                                    print(variation['ID']+":This INS event has peptide covering the position, but AA is not same. Peptide :"+PSMsOfORF.iloc[i]['Sequence'])
-                            elif int(proacc_start_stop_pre_postList.group(2))>=altStart and altEnd>=int(proacc_start_stop_pre_postList.group(2)) and altEnd<=int(proacc_start_stop_pre_postList.group(3)):
+                                    print(str(variation['ID'])+":This INS event has peptide covering the position, but AA is not same. Peptide :"+PSMsOfORF.iloc[i]['Sequence'])
+                            elif int(proacc_start_stop_pre_postList.group(1))>=altStart and altEnd>=int(proacc_start_stop_pre_postList.group(1)) and altEnd<=int(proacc_start_stop_pre_postList.group(2)):
                                 ## Partial peptide coverage
                                 position=0
-                                positionEnd=altEnd-int(proacc_start_stop_pre_postList.group(2))+1
+                                positionEnd=altEnd-int(proacc_start_stop_pre_postList.group(1))+1
                                 ## part of the variation['ALT'] will be missing
-                                altIdx=altStart-int(proacc_start_stop_pre_postList.group(2))
+                                altIdx=altStart-int(proacc_start_stop_pre_postList.group(1))
+                                print("6. Overlap")
                                 if variation['ALT'][altIdx:]==PSMsOfORF.iloc[i]['Sequence'][position:positionEnd]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Partial'})),ignore_index=True)
+                                    print("6.pep found")
                                 else:
-                                    print(variation['ID']+": This INS event has peptide covering the position, but AA is not same. Peptide :"+PSMsOfORF.iloc[i]['Sequence'])
-                            elif int(proacc_start_stop_pre_postList.group(2))<=altStart and altStart<=int(proacc_start_stop_pre_postList.group(3)) and altEnd>=int(proacc_start_stop_pre_postList.group(3)):
+                                    print(str(variation['ID'])+": This INS event has peptide covering the position, but AA is not same. Peptide :"+PSMsOfORF.iloc[i]['Sequence'])
+                            elif int(proacc_start_stop_pre_postList.group(1))<=altStart and altStart<=int(proacc_start_stop_pre_postList.group(2)) and altEnd>=int(proacc_start_stop_pre_postList.group(2)):
                                 ## Partial match
-                                position=altStart-int(proacc_start_stop_pre_postList.group(2))
-                                altEndIdx=int(proacc_start_stop_pre_postList.group(3))-altStart
+                                position=altStart-int(proacc_start_stop_pre_postList.group(1))
+                                altEndIdx=int(proacc_start_stop_pre_postList.group(2))-altStart
+                                print("7. Overlap")
                                 if variation['ALT'][0:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][position:]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Partial'})),ignore_index=True)
+                                    print("7.pep found")
                                 else:
-                                    print(variation['ID']+": This INS event has peptide covering the position, but AA is not same. Peptide :"+PSMsOfORF.iloc[i]['Sequence'])
+                                    print(str(variation['ID'])+": This INS event has peptide covering the position, but AA is not same. Peptide :"+PSMsOfORF.iloc[i]['Sequence'])
                             else:
-                                print(variation['ID']+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
+                                print(str(variation['ID'])+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
                         elif variation['Type']=='DEL':
                             ## Deletion Event. To proof that the deletion is true, I need to check that the peptide sequence does not support the
                             ## ref sequence.
@@ -160,60 +184,74 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                             altEnd=int(variation['QPOS'])+len(variation['REF'])-1
                             ## Check whether this identified peptide overlaps with this deletion event.
                             ## The overlap can either be full or partial overlap.
-                            if int(proacc_start_stop_pre_postList.group(2))<=altStart and altEnd<=int(proacc_start_stop_pre_postList.group(3)):
+                            if int(proacc_start_stop_pre_postList.group(1))<=altStart and altEnd<=int(proacc_start_stop_pre_postList.group(2)):
                                 ##this means the deletion event is fully covered by the peptide.
                                 ##pythonic indexes are 0 based.
-                                position=int(variation['QPOS'])-int(proacc_start_stop_pre_postList.group(2))
+                                position=int(variation['QPOS'])-int(proacc_start_stop_pre_postList.group(1))
                                 altLength=len(variation['REF'])
+                                print("8. Overlap")
                                 ## if the ref sequenece is there in the peptide or the only the deleted AAs are there, then the deletion event is not supported.
                                 ## The OR part might be true due to AAs repeatation, but we dont have a way to disproof it without further checking. 
                                 if variation['REF']==PSMsOfORF.iloc[i]['Sequence'][position:(position+altLength)] or variation['REF'][1:]==PSMsOfORF.iloc[i]['Sequence'][(position+1):(position+altLength)]:
-                                    print(variation['ID']+" DEL event event has peptide covering the position. The peptide sequence supports the reference sequence :"+PSMsOfORF.iloc[i]['Sequence'])
+                                    print(str(variation['ID'])+" DEL event event has peptide covering the position. The peptide sequence supports the reference sequence :"+PSMsOfORF.iloc[i]['Sequence'])
                                 elif variation['ALT']==PSMsOfORF.iloc[i]['Sequence'][position:(position+1)]:
                                     ## position plus one because alt will only have one AA from deletion start point-1 position to represent the deletion.
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Full'})),ignore_index=True)
+                                    print("8.pep found")
                                 else:
                                     print("ERROR: peptide neither support ALT nor REF. variation:"+variation['ID']+", peptide:"+PSMsOfORF.iloc[i]['Sequence'])
-                            elif int(proacc_start_stop_pre_postList.group(2))>=altStart and altEnd>=int(proacc_start_stop_pre_postList.group(2)) and altEnd<=int(proacc_start_stop_pre_postList.group(3)):
+                            elif int(proacc_start_stop_pre_postList.group(1))>=altStart and altEnd>=int(proacc_start_stop_pre_postList.group(1)) and altEnd<=int(proacc_start_stop_pre_postList.group(2)):
                                 ## Partial peptide coverage
                                 position=0
-                                positionEnd=altEnd-int(proacc_start_stop_pre_postList.group(2))+1
-                                altIdx=altStart-int(proacc_start_stop_pre_postList.group(2))
+                                positionEnd=altEnd-int(proacc_start_stop_pre_postList.group(1))+1
+                                altIdx=altStart-int(proacc_start_stop_pre_postList.group(1))
+                                print("9. Overlap")
                                 if variation['REF'][altIdx:]==PSMsOfORF.iloc[i]['Sequence'][position:positionEnd] or variation[(altIdx+1):]==PSMOfORF.iloc[i]['Sequence'][(position+1):positionEnd]:
-                                    print(variation['ID']+" DEL event event has peptide covering the position, but the peptide is partially supporting the reference sequence:"+PSMsOfORF.iloc[i]['Sequence'])
+                                    print(str(variation['ID'])+" DEL event event has peptide covering the position, but the peptide is partially supporting the reference sequence:"+PSMsOfORF.iloc[i]['Sequence'])
                                 elif variation['ALT']==PSMsOfORF.iloc[i]['Sequence'][position]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'FULL'})),ignore_index=True)
+                                    print("9.pep found")
                                 else:
                                     print("ERROR: peptide neither support ALT nor REF. variation:"+variation['ID']+", peptide:"+PSMsOfORF.iloc[i]['Sequence'])
-                            elif int(proacc_start_stop_pre_postList.group(2))<=altStart and altStart<=int(proacc_start_stop_pre_postList.group(3)) and altEnd>=int(proacc_start_stop_pre_postList.group(3)):
+                            elif int(proacc_start_stop_pre_postList.group(1))<=altStart and altStart<=int(proacc_start_stop_pre_postList.group(2)) and altEnd>=int(proacc_start_stop_pre_postList.group(2)):
                                 ## Partial match
-                                position=altStart-int(proacc_start_stop_pre_postList.group(2))
-                                altEndIdx=int(proacc_start_stop_pre_postList.group(3))-altStart
+                                position=altStart-int(proacc_start_stop_pre_postList.group(1))
+                                altEndIdx=int(proacc_start_stop_pre_postList.group(2))-altStart
+                                print("10. Overlap")
                                 if variation['REF'][0:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][position:] or variation['REF'][1:altEndIdx]==PSMsOfORF.iloc[i]['Sequence'][(position+1):]:
-                                    print(variation['ID']+" DEL event event has peptide covering the position, but the peptide is partially supporting the reference sequence:"+PSMsOfORF.iloc[i]['Sequence'])
+                                    print(str(variation['ID'])+" DEL event event has peptide covering the position, but the peptide is partially supporting the reference sequence:"+PSMsOfORF.iloc[i]['Sequence'])
                                 elif variation['ALT']==PSMsOfORF.iloc[i]['Sequence'][position]:
                                     prevFound=1
                                     PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'FULL'})),ignore_index=True)
+                                    print("10.pep found")
                                 else:
                                     print("ERROR: peptide neither support ALT nor REF. variation:"+variation['ID']+", peptide:"+PSMsOfORF.iloc[i]['Sequence'])
                             else:
-                                print(variation['ID']+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
+                                print(str(variation['ID'])+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
+                elif count==0:
+                    print("Count is 0, i.e. protacc_start_end_prev_next does not match:"+proacc_start_stop_pre_post[0])
+                    print("ORFId:"+ORFId)
                 else:
-                    print("ERROR: count is not 1")
+                    print("ERROR: count is not 1:"+protAcc)
+                    print("ORFId:"+ORFId)
+                    print("proacc_start_stop_pre_postList:"+proacc_start_stop_pre_postList.groups())
             else:
                 ##ERROR
-                print("ERROR: proacc_start_stop_pre_post list should have single entry")
+                print(proacc_start_stop_pre_post+" ERROR: proacc_start_stop_pre_post list should have single entry")
         else:
             ## This suggest multiple Spectra match to a peptide. Peptide sequence might be the same, but the PSM
             ## is not.
             if prevFound==1:
+                print("11. Overlap")
+                print("10.pep found")
                 ##this means prevPeptide was counted as an evidence of the variaton. Hence this PSM should also
                 ##be counted.
-                PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':PSMsOfORF.iloc[i-1]['Evidence']})),ignore_index=True)
-            else:
-                print(variation['ID']+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
+                PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':PSMEvidence.iloc[i-1]['Evidence']})),ignore_index=True)
+            #else:
+            #    print(str(variation['ID'])+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
+    print("PSMEvd:"+PSMEvidence)
     return PSMEvidence
 
 def groupPeptide(peptideGrouped, ORFId):
@@ -284,6 +322,8 @@ def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
     print(vcf.QueryID[0:5])
     vcf.Alignment=vcf.Alignment.str.replace('Alignment=\[','')
     vcf.Alignment=vcf.Alignment.str.replace('\]','')
+    vcf.Type=vcf.Type.str.replace('Type:','')
+    vcf.QPOS=vcf.QPOS.str.replace('QPOS:','')
     ##groups vcf entries by ORF/Query ids.
     vcfGrouped=vcf.groupby('QueryID')
     
@@ -299,6 +339,8 @@ def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
         pattern=re.compile('&')
         ORFId=pattern.sub(',',name)
         ## find peptide evidence of this ORF
+        print("ORFId:"+ORFId)
+        
         PSMsOfORF=groupPeptide(peptideGrouped, ORFId)
         if len(PSMsOfORF)>0:    
             ##For each entry in the query, which is essentially the variations, check overlap between the variation and these peptide.
@@ -306,16 +348,19 @@ def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
                 variation=variations.iloc[i]
                 ## Match
                 PSMsOfVariations=checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation)
+                #print(PSMsOfVariations.head(1))
                 if len(PSMsOfVariations)>0:
+                    print("Variation "+variation['ID']+" has peptide evidence")
                     PSMsOfVariation=addVariationInfoToPSM(PSMsOfVariation, variation)
                     variation=addPSMInfoToVariation(variation, PSMsOfVariation)
                     printPSMsOfVariation(PSMsOfVariations, newPSMFile,headerFlag)
                     printValidatedVariations(variation, newVcfFile,headerFlag)
                     headerFlag=0
                 else:
-                    print(variation['ID']+" does not have peptide evidence")
+                    print(str(variation['ID'])+" does not have peptide evidence")
         else:
             print(ORFId+" was not identified")
+        
 
 def readFile(filename, sep):
     fileDFObj = pd.read_table(filename, sep=sep)
@@ -337,5 +382,12 @@ vcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assem
 ## New Files
 newPSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+groupingVariationEvidence.csv"
 newVcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7PeptideEvidence.vcf"
+'''
+PSMFileName="pepTest.csv"
+vcfFileName="vcfTest.vcf"
 
+## New Files
+newPSMFileName="pepVariationEvidence.csv"
+newVcfFileName="vcfPeptideEvidence.vcf"
+'''
 main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName)
