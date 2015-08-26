@@ -31,6 +31,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
     prevFound=0
     PSMEvidence=pd.DataFrame();
     for i in range(0,len(PSMsOfORF)):
+        print("i:"+str(i))
         protAcc=PSMsOfORF.iloc[i]['proteinacc_start_stop_pre_post_;']
         pepSeq=PSMsOfORF.iloc[i]['Sequence']
         if prevPeptide!=pepSeq:
@@ -84,7 +85,8 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                                 ## add this proof to the matrix
                                 prevFound=1
                                 PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':'Full'})),ignore_index=True)
-                                print("1.pep found:"+PSMEvidence)
+                                print("1.pep found:")
+                                print(PSMEvidence.to_csv())
                             else:
                                 print(str(variation['ID'])+" SAP/SSAP event event has peptide covering the position, but AA is not same. peptide :"+PSMsOfORF.iloc[i]['Sequence'])
                         else:
@@ -246,9 +248,11 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
             if prevFound==1:
                 print("11. Overlap")
                 print("10.pep found")
+                print("Length of PSMEvidence"+str(len(PSMEvidence)))
                 ##this means prevPeptide was counted as an evidence of the variaton. Hence this PSM should also
                 ##be counted.
-                PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':PSMEvidence.iloc[i-1]['Evidence']})),ignore_index=True)
+                print(PSMsOfORF.iloc[i].to_csv(None))
+                PSMEvidence=PSMEvidence.append(PSMsOfORF.iloc[i].append(pd.Series({'Evidence':PSMEvidence.iloc[len(PSMEvidence)-1]['Evidence']})),ignore_index=True)
             #else:
             #    print(str(variation['ID'])+": This variation is not supported by "+PSMsOfORF.iloc[i]['Sequence'])
     print("PSMEvd:"+PSMEvidence)
@@ -375,7 +379,7 @@ def main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName):
     ##be little tricky. Not finding any peptide for deletion event is a good sign but does not confirms the deletion.
     with open(newVcfFileName, 'w') as newVcfFile, open(newPSMFileName, 'w') as newPSMFile:
         findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile)
-    
+
 PSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+grouping.csv"
 vcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
 
@@ -389,5 +393,6 @@ vcfFileName="vcfTest.vcf"
 ## New Files
 newPSMFileName="pepVariationEvidence.csv"
 newVcfFileName="vcfPeptideEvidence.vcf"
+
 '''
 main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName)

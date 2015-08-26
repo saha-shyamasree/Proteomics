@@ -13,3 +13,11 @@
 1	1530	79686.1	S	E	SubjectId=P49454;QueryId=Dataset_A_asmbl_5912_ORF46_Frame_1_187-7632;Alignment=[QueryLength=2482:QueryStart=801:QueryEnd=2482:SubjectLength=3210:SubjectStart=1529:SubjectEnd=3210];Type:SAP;QPOS:802
 1	1611	79686.2	V	A	SubjectId=P49454;QueryId=Dataset_A_asmbl_5912_ORF46_Frame_1_187-7632;Alignment=[QueryLength=2482:QueryStart=801:QueryEnd=2482:SubjectLength=3210:SubjectStart=1529:SubjectEnd=3210];Type:SAP;QPOS:883
 6	114	12735.1	E	D	SubjectId=P08107;QueryId=Dataset_A_asmbl_49775_ORF3_Frame_-1_2182-260;Alignment=[QueryLength=641:QueryStart=1:QueryEnd=641:SubjectLength=641:SubjectStart=1:SubjectEnd=641];Type:SSAP;QPOS:114
+12	287	310149.1	T	S	SubjectId=Q9BQE3;QueryId=Dataset_A_asmbl_13329_ORF25_Frame_3_117-1469;Alignment=[QueryLength=451:QueryStart=1:QueryEnd=451:SubjectLength=449:SubjectStart=1:SubjectEnd=449];Type:SSAP;QPOS:287
+12	340	310149.2	T	S	SubjectId=Q9BQE3;QueryId=Dataset_A_asmbl_13329_ORF25_Frame_3_117-1469;Alignment=[QueryLength=451:QueryStart=1:QueryEnd=451:SubjectLength=449:SubjectStart=1:SubjectEnd=449];Type:SSAP;QPOS:340
+12	384	310149.3	V	I	SubjectId=Q9BQE3;QueryId=Dataset_A_asmbl_13329_ORF25_Frame_3_117-1469;Alignment=[QueryLength=451:QueryStart=1:QueryEnd=451:SubjectLength=449:SubjectStart=1:SubjectEnd=449];Type:SSAP;QPOS:384
+12	437	310149.4	A	V	SubjectId=Q9BQE3;QueryId=Dataset_A_asmbl_13329_ORF25_Frame_3_117-1469;Alignment=[QueryLength=451:QueryStart=1:QueryEnd=451:SubjectLength=449:SubjectStart=1:SubjectEnd=449];Type:SAP;QPOS:437
+12	439	310149.5	S	SVE	SubjectId=Q9BQE3;QueryId=Dataset_A_asmbl_13329_ORF25_Frame_3_117-1469;Alignment=[QueryLength=451:QueryStart=1:QueryEnd=451:SubjectLength=449:SubjectStart=1:SubjectEnd=449];Type:INS;QPOS:439
+12	440	310149.6	A	G	SubjectId=Q9BQE3;QueryId=Dataset_A_asmbl_13329_ORF25_Frame_3_117-1469;Alignment=[QueryLength=451:QueryStart=1:QueryEnd=451:SubjectLength=449:SubjectStart=1:SubjectEnd=449];Type:ALT;QPOS:442
+12	441	310149.7	D	E	SubjectId=Q9BQE3;QueryId=Dataset_A_asmbl_13329_ORF25_Frame_3_117-1469;Alignment=[QueryLength=451:QueryStart=1:QueryEnd=451:SubjectLength=449:SubjectStart=1:SubjectEnd=449];Type:SSAP;QPOS:443
+12	444	310149.8	D	E	SubjectId=Q9BQE3;QueryId=Dataset_A_asmbl_13329_ORF25_Frame_3_117-1469;Alignment=[QueryLength=451:QueryStart=1:QueryEnd=451:SubjectLength=449:SubjectStart=1:SubjectEnd=449];Type:SSAP;QPOS:446
