@@ -1,30 +1,29 @@
-## This R code Reads (1) the list of known proteins with/without SAPs, (2) isoforms with/without SAPs, and (3) the list of ORFs classified according to their
+## This Python code Reads (1) the list of known proteins with/without SAPs, (2) isoforms with/without SAPs, and (3) the list of ORFs classified according to their
 ## transcript bio-type. Aim of this code is to exclude (1) from the list of (3).
 
-source("D:/Code/Proteomics/R/RLib.R")
-readList<-function(filepath)
-{
-    as.matrix(read.csv(file=filepath, header=TRUE))
-}
+import pandas as pd
+import re
 
-subsetProteins<-function(Mat1, MatList)
-{
+def readList(filename, sep):
+    fileDFObj = pd.read_table(filename, sep=sep)
+    return fileDFObj;
+
+def subsetProteins(Mat1, MatList):
+    ## this code find the overlap
     
-}
-main<-function(knownPro, knownProSAP, iso, isoSAP, nonCDSFileNameList)
-{
+def main(knownPro, knownProSAP, iso, isoSAP, nonCDSFileNameList):
     ## Read a) known proteins, b) known proteins with SAPs including ALT/INDELs, c) isoforms, and d) isoforms with SAPs/ALT/INDELs
     ## Known Protein
-    knownProteins=readList(knownPro)
+    knownProteins=readList(knownPro,',')
     ## Known with SAPs/ALT/INDELs
-    knownProteinsSAPs=readList(knownProSAP)
+    knownProteinsSAPs=readList(knownProSAP,',')
     ## Isoforms
-    isoforms=readList(iso)
+    isoforms=readList(iso,',')
     ## Isoforms with SAPs/ALT/INDELs
-    isoformsSAPs=readList(isoSAP)
+    isoformsSAPs=readList(isoSAP,',')
     ## Read i) anisense, ii) linc, iii) nonsense-mediated decay, iv) processed transcript, v) reatined intron and any other ORFs from
     ## non CDS RNA bio type.
-    nonCDS=list()
+    nonCDS=[]
     for(i in 1:length(nonCDSFilenameList))
     {
         nonCDS[i]=readList(nonCDSFilenameList[i])
@@ -36,4 +35,3 @@ main<-function(knownPro, knownProSAP, iso, isoSAP, nonCDSFileNameList)
     subsetProteins(knownProteinsSAPs,nonCDS)
     subsetProteins(isoforms,nonCDS)
     subsetProteins(isoformsSAPs,nonCDS)
-}
