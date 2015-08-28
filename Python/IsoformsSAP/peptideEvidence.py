@@ -30,9 +30,11 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
     prevPeptide=''
     prevFound=0
     PSMEvidence=pd.DataFrame();
+    print("variation id:"+str(variation['ID']))
     for i in range(0,len(PSMsOfORF)):
-        print("i:"+str(i))
+        
         protAcc=PSMsOfORF.iloc[i]['proteinacc_start_stop_pre_post_;']
+        print("prot accession:"+protAcc)
         pepSeq=PSMsOfORF.iloc[i]['Sequence']
         if prevPeptide!=pepSeq:
             ## Check whether this PSM covers the location of the variation.
@@ -69,7 +71,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                     ## Check whether location of the SAP/ALT/INDEL is covered by this peptide.
                     ## For SAPs its straight forward. 
                     ## It might happen that for ALT/INDELs the peptide covers the event partially.
-                    print("Count:"+str(count))
+                    #print("Count:"+str(count))
                     if variation['Type']=='SAP' or variation['Type']=='SSAP':
                         #print("Var type S/SAP")
                         print("proacc start-end:"+str(proacc_start_stop_pre_postList.group(1))+"-"+str(proacc_start_stop_pre_postList.group(2)))
@@ -95,6 +97,9 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
                         if variation['Type']=='ALT' or variation['Type']=='SALT':
                             ## The Alteration event might have partial peptide coverage.
                             altStart=int(variation['QPOS'])
+                            #print("ORFId:"+ORFId)
+                            #print("variation:"+variation.to_csv(None))
+                            #print("alt:"+str(variation['ALT']))
                             altEnd=int(variation['QPOS'])+len(variation['ALT'])-1
                             ## Check whether this identified peptide overlaps with this alteration event.
                             ## The overlap can either be full or partial overlap.
@@ -301,12 +306,15 @@ def addPSMInfoToVariation(variation, PSMsOfVariation):
     PSMCount=len(PSMsOfVariation['PSM_ID'].unique())
     ## Number of peptide sequences
     peptideCount=len(PSMsOfVariation['Sequence'].unique())
-    ## Unique peptides
-    unqPeptides=",".join(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique())
-    if unqPeptides:
-        unqPeptides="-"
+    
     ## Count of peptide sequences that uniquely map to this ORF/Protein
-    unqPeptideCount=(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';')).sum() ##~ is doing the job of negation, i.e. does not contain. This means the peptide is not shared with other proteins
+    unqPeptideCount=len(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique()) ##~ is doing the job of negation, i.e. does not contain. This means the peptide is not shared with other proteins
+    ## Unique peptides
+    print("Unique Peptide:")
+    print(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique())
+    unqPeptides=",".join(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique())
+    if not unqPeptides:
+        unqPeptides="-"
     PSMInfo={'PSMCount':PSMCount,'PeptideCount':peptideCount,'UniquePeptideCount':unqPeptideCount,'UniquePeptide':unqPeptides,'ConfidenceScore':score}
     writeVar=variation.append(pd.Series(PSMInfo))
     print(writeVar.to_csv(None))
@@ -315,7 +323,7 @@ def addPSMInfoToVariation(variation, PSMsOfVariation):
 def printValidatedVariations(variation, newVcfFile, headerFlag):
     ##This is another vcf
     if headerFlag==1:
-        newVcfFile.write("#Chr\tPOS within Protein\tID\tREF\tALT\tINFO")
+        newVcfFile.write("#Chr\tPOS within Protein\tID\tREF\tALT\tINFO\n")
     ##SubjectID','QueryID','Alignment','Type','QPOS'
     newVcfFile.write(str(variation['#Chr'])+"\t"+str(variation['POS within Protein'])+"\t"+str(variation['ID'])+"\t"+variation['REF']+"\t"+variation['ALT']+"\t"+"SubjectId="+variation['SubjectID']+";QueryId="+variation['QueryID'].replace(',','&')+";Alignment=["+variation['Alignment']+"];Type:"+variation['Type']+";QPOS:"+str(variation['QPOS'])+";PeptideCount:"+str(variation['PeptideCount'])+";UniquePeptideCount:"+str(variation['UniquePeptideCount'])+";Peptides:"+variation['UniquePeptide']+";Score:"+str(variation['ConfidenceScore'])+"\n")
 
@@ -371,7 +379,7 @@ def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
         
 
 def readFile(filename, sep):
-    fileDFObj = pd.read_table(filename, sep=sep)
+    fileDFObj = pd.read_table(filename, sep=sep, keep_default_na=False, na_values=[''])
     return fileDFObj;
 
 def main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName):
@@ -383,6 +391,7 @@ def main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName):
     ##be little tricky. Not finding any peptide for deletion event is a good sign but does not confirms the deletion.
     with open(newVcfFileName, 'w') as newVcfFile, open(newPSMFileName, 'w') as newPSMFile:
         findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile)
+
 
 PSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+grouping.csv"
 vcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
@@ -397,6 +406,5 @@ vcfFileName="vcfTest.vcf"
 ## New Files
 newPSMFileName="pepVariationEvidence.csv"
 newVcfFileName="vcfPeptideEvidence.vcf"
-
 '''
 main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName)
