@@ -320,12 +320,15 @@ def addPSMInfoToVariation(variation, PSMsOfVariation):
     print(writeVar.to_csv(None))
     return writeVar
 
-def printValidatedVariations(variation, newVcfFile, headerFlag):
+def printValidatedVariations(variation, newVcfFile, headerFlag, fileFlag):
     ##This is another vcf
     if headerFlag==1:
         newVcfFile.write("#Chr\tPOS within Protein\tID\tREF\tALT\tINFO\n")
     ##SubjectID','QueryID','Alignment','Type','QPOS'
-    newVcfFile.write(str(variation['#Chr'])+"\t"+str(variation['POS within Protein'])+"\t"+str(variation['ID'])+"\t"+variation['REF']+"\t"+variation['ALT']+"\t"+"SubjectId="+variation['SubjectID']+";QueryId="+variation['QueryID'].replace(',','&')+";Alignment=["+variation['Alignment']+"];Type:"+variation['Type']+";QPOS:"+str(variation['QPOS'])+";PeptideCount:"+str(variation['PeptideCount'])+";UniquePeptideCount:"+str(variation['UniquePeptideCount'])+";Peptides:"+variation['UniquePeptide']+";Score:"+str(variation['ConfidenceScore'])+"\n")
+    if fileFlag==1:
+        newVcfFile.write(str(variation['#Chr'])+"\t"+str(variation['POS within Protein'])+"\t"+str(variation['ID'])+"\t"+variation['REF']+"\t"+variation['ALT']+"\t"+"SubjectId="+variation['SubjectID']+";QueryId="+variation['QueryID'].replace(',','&')+";Alignment=["+variation['Alignment']+"];Type:"+variation['Type']+";QPOS:"+str(variation['QPOS'])+";PeptideCount:"+str(variation['PeptideCount'])+";UniquePeptideCount:"+str(variation['UniquePeptideCount'])+";Peptides:"+variation['UniquePeptide']+";Score:"+str(variation['ConfidenceScore'])+"\n")
+    else:
+        newVcfFile.write(str(variation['#Chr'])+"\t"+str(variation['POS within Protein'])+"\t"+str(variation['ID'])+"\t"+variation['REF']+"\t"+variation['ALT']+"\t"+"SubjectId="+variation['SubjectID']+";QueryId="+variation['QueryID'].replace(',','&')+";Alignment=["+variation['Alignment']+"];Type:"+variation['Type']+";QPOS:"+str(variation['QPOS'])+"\n")
 
 def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
     ## vcf file fields: Chr, POS within Protein,ID, REF, ALT, INFO(SubjectId=P09417-2;QueryId=Dataset_A_asmbl_41426_ORF20_Frame_3_84-446;Alignment=[QueryLength=121:QueryStart=1:QueryEnd=116:SubjectLength=213:SubjectStart=1:SubjectEnd=116];Type:SSAP;QPOS:116)
@@ -360,6 +363,7 @@ def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
         PSMsOfORF=groupPeptide(peptideGrouped, ORFId)
         if len(PSMsOfORF)>0:    
             ##For each entry in the query, which is essentially the variations, check overlap between the variation and these peptide.
+            
             for i in range(len(variations)):
                 variation=variations.iloc[i]
                 ## Match
@@ -370,7 +374,7 @@ def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
                     PSMsOfVariations=addVariationInfoToPSM(PSMsOfVariations, variation)
                     variation=addPSMInfoToVariation(variation, PSMsOfVariations)
                     printPSMsOfVariation(PSMsOfVariations, newPSMFile,headerFlag)
-                    printValidatedVariations(variation, newVcfFile,headerFlag)
+                    printValidatedVariations(variation, newVcfFile,headerFlag,1)
                     headerFlag=0
                 else:
                     print(str(variation['ID'])+" does not have peptide evidence")
@@ -393,10 +397,49 @@ def main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName):
         findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile)
 
 
+def subsettingIdentifiedORFVariation(vcf, PSMs, subVcfFileName):
+    ## vcf file fields: Chr, POS within Protein,ID, REF, ALT, INFO(SubjectId=P09417-2;QueryId=Dataset_A_asmbl_41426_ORF20_Frame_3_84-446;Alignment=[QueryLength=121:QueryStart=1:QueryEnd=116:SubjectLength=213:SubjectStart=1:SubjectEnd=116];Type:SSAP;QPOS:116)
+    ## split the INFO column and add them to main data frame
+    info=pd.DataFrame(vcf.INFO.str.split(';').tolist(),columns=['SubjectID','QueryID','Alignment','Type','QPOS'])
+    vcf=vcf.drop('INFO',1)
+    vcf=vcf.join(info)
+    vcf.SubjectID=vcf.SubjectID.str.replace('SubjectId=','')
+    vcf.QueryID=vcf.QueryID.str.replace('QueryId=','')
+    print(vcf.QueryID[0:5])
+    vcf.Alignment=vcf.Alignment.str.replace('Alignment=\[','')
+    vcf.Alignment=vcf.Alignment.str.replace('\]','')
+    vcf.Type=vcf.Type.str.replace('Type:','')
+    vcf.QPOS=vcf.QPOS.str.replace('QPOS:','')
+    ##groups vcf entries by ORF/Query ids.
+    vcfGrouped=vcf.groupby('QueryID')
+    
+    ##in the same way group the PSMs according to the prptide sequence.
+    peptideGrouped=PSMs.groupby('Sequence')
+    # each of these group represents all the SAPs/ALTs/INDELs for a ORF/Query
+    headerFlag=1
+    with open(subVcfFileName, 'w') as subVcfFile:
+        for name, variations in vcfGrouped:
+            ## check whether this ORF has been identified and whether this SAP/ALT/INDEL event has a peptide evidence.
+            ## the ORF id contained ',' which was replaced by ';' in contigStat.pl as this code produce comma separated file. Later
+            ## on IdentifyProeinIsoformSAP.py replaced ';' by '&' for same cause. ORFs with multiple parent
+            ## transcripts have '&'. Whereas, the same ORFs in the PSMs list contain ','.
+            pattern=re.compile('&')
+            ORFId=pattern.sub(',',name)
+            ## find peptide evidence of this ORF
+            print("ORFId:"+ORFId)
+            
+            PSMsOfORF=groupPeptide(peptideGrouped, ORFId)
+            if len(PSMsOfORF)>0:    
+                ##For each entry in the query, which is essentially the variations, check overlap between the variation and these peptide.
+                printValidatedVariations(variation, newVcfFile,headerFlag,1)
+            else:
+                print(ORFId+" was not identified")
+            
 PSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+grouping.csv"
 vcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
 
 ## New Files
+vcfIdentifiedProteins="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_VariationV7IdentifiedOnly.vcf"
 newPSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+groupingVariationEvidence.csv"
 newVcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7PeptideEvidence.vcf"
 '''

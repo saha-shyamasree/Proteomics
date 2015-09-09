@@ -7,6 +7,19 @@ readList<-function(filepath)
     as.matrix(read.csv(file=filepath, header=TRUE))
 }
 
+identifiedORFsClassUnknown<-function(identifiedORFs, knownProteinList, knownProteinSAPList, isoformList, isoformSAPList, outFile)
+{
+    Mat=identifiedORFs[-(which(identifiedORFs[,'description'] %in% knownProteinList[,'ORF.Id'])),]
+    print(dim(Mat))
+    Mat=Mat[-(which(Mat[,'description'] %in% knownProteinSAPList[,'ORF.Id'])),]
+    print(dim(Mat))
+    Mat=Mat[-(which(Mat[,'description'] %in% isoformList[,'ORF.Id'])),]
+    print(dim(Mat))
+    Mat=Mat[-(which(Mat[,'description'] %in% isoformSAPList[,'ORF.Id'])),]
+    print(dim(Mat))
+    write.table(Mat,file=outFile,sep='\t',quote = FALSE,row.names = FALSE, col.names=TRUE)
+}
+
 #identifiedORFs is filtered and protein accession replaced by uniprot ids matrix of identified ORFs, knownProteinList is list of ORFs with exact match to an Uniprot protein
 identifiedORFsClassKnownProtein<-function(identifiedORFs, knownProteinList, outFile)
 {
@@ -62,7 +75,7 @@ knownIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_knownProtei
 knownSAPIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_knownSAPProteinsV7.tsv")
 isoformIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_isoformProteinsV7.tsv")
 isoformSAPsIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_isoformSAPsProteinsV7.tsv")
-
+novelIdentifiedProteinsPath=paste(identifiedORFsDir,"pasa_assemblyV1_novelProteinsV7.tsv")
 
 blastFile="human_adeno_mydb_pasa.assemblies_ORFsV1.csv"
 blastDir="D:/data/blast/blastCSV/PASA/Human-Adeno/"
@@ -77,6 +90,7 @@ knownProteinSAPList=readList(knownProteinSAPPath)
 isoformList=readList(isoformPath)
 isoformSAPsList=readList(isoformSAPsPath)
 
+identifiedORFsClassUnknown(identifiedORFs, knownProteinList, knownProteinSAPList, isoformList, isoformSAPsList, novelIdentifiedProteinsPath)
 identifiedORFsClassKnownProtein(identifiedORFs,knownProteinList,knownIdentifiedProteinsPath)
 identifiedORFsClassKnownProteinSAP(identifiedORFs,knownProteinSAPList,knownSAPIdentifiedProteinsPath)
 identifiedORFsClassIsoform(identifiedORFs,isoformList,isoformIdentifiedProteinsPath)

@@ -174,6 +174,72 @@ calculateAndWrite <- function(Mat1, Mat2, Mat1FileNamePostfix, Mat2FileNamePostf
     print(res2$count)
 }
 
+calculateAndReturnOverlapMatrix <- function(Mat1, Mat2, Mat1FileNamePostfix, Mat2FileNamePostfix)
+{
+    Mat1Anchor=proteinGrpAnchor(Mat1)
+    Mat2Anchor=proteinGrpAnchor(Mat2)
+    
+    ## After reaplacing Mat1 with Mat2 ids, Mat1 ends up with non-unique protein accessions. In next line is removing duplicates from anchor protein ids.
+    m1=Mat1Anchor[!duplicated(Mat1Anchor[,'protein.accession']),]
+    print(paste("m1:",dim(m1)))
+    Mat1Sub=as.matrix(Mat1[grep('sequence.*',Mat1[,'group.membership']),]) #Mat1 sub members
+    #removing any duplicate protein, if it is uniprot, then there should not be any duplicate. if it is PIT result, there will be duplicates because often multiple ORFs map back to same uniprot protein.
+    m1_sub=Mat1Sub[!duplicated(Mat1Sub[,'protein.accession']),]
+    #finding submember protein ids that does not exist in the anchor protein list.
+    m1_sub_dup=m1_sub[which(!m1_sub[,'protein.accession'] %in% m1[,'protein.accession']),]
+    #findinng PAGs that only has submembers.
+    m1_sub_dup_no_anchor=m1_sub_dup[which(!m1_sub_dup[,'PAG.ID'] %in% m1[,'PAG.ID']),]
+    #removing submembers without an anchor protein.
+    m1_sub_dup_anchor=m1_sub_dup[-which(!m1_sub_dup[,'PAG.ID'] %in% m1[,'PAG.ID']),]
+    print(paste("m1_sub_dup_anchor:",dim(m1_sub_dup_anchor)))
+    m1_merged=m1
+    #merged unique protein/PAg lists. duplicates from anchor and submembers are done separately to avoid removing an anchor id when there is a submember with same id. 
+    m1_merged=rbind(m1_merged, m1_sub_dup_anchor)
+   
+    a_to_a=m1[overlap2(m1[,'protein.accession'],Mat2Anchor[,'protein.accession']),]
+    
+    Mat2atoaPAG=Mat2Anchor[overlap2(Mat2Anchor[,'protein.accession'],m1[,'protein.accession']),'PAG.ID']
+    Mat2_without_atoaPAG=Mat2[-which(Mat2[,'PAG.ID'] %in% Mat2atoaPAG),]
+    Mat2_without_atoaPAG_anchor=proteinGrpAnchor(Mat2_without_atoaPAG)
+   
+    m1_merge_atoaPAG=a_to_a[,'PAG.ID']
+    m1_merged_without_atoaPAG=m1_merged[-which(m1_merged[,'PAG.ID'] %in% m1_merge_atoaPAG),]
+    
+    m1_without_atoaPAG_anchor=proteinGrpAnchor(m1_merged_without_atoaPAG)
+    a_to_mapped_pags=m1_merged[which(m1_merged[,'PAG.ID'] %in% a_to_a[,'PAG.ID']),]
+    
+    
+    res=PAG_overlap(m1_without_atoaPAG_anchor,Mat2_without_atoaPAG)
+    trinityAnchortoUniSubOverlap=m1_merged_without_atoaPAG[which(m1_merged_without_atoaPAG[,'PAG.ID'] %in% m1_without_atoaPAG_anchor[res$idx,'PAG.ID']),]
+    #write.table(trinityAnchortoUniSubOverlap,file=paste(d1,"PASAAnchortoUniSub_PAGs",upper,".tsv",sep=""),sep='\t',quote = FALSE,row.names = FALSE)
+    
+    m1_merged_without_atosub=m1_merged_without_atoaPAG[which(m1_merged_without_atoaPAG[,'PAG.ID'] %in% res$M1[,'PAG.ID']),]
+    dim(m1_merged_without_atosub)
+    dim(res$M1)
+    dim(res$M2)
+    Mat2_without_subtoa_anchor = proteinGrpAnchor(res$M2)
+    dim(Mat2_without_subtoa_anchor)
+    
+    #m1_without_atoaPAG_anchor[res$idx,'protein.accession']
+    res2=PAG_overlap(Mat2_without_subtoa_anchor,m1_merged_without_atosub)
+    print(res2$count)
+    dim(res2$M1)
+    dim(proteinGrpAnchor(res2$M2))
+    res2$idx
+    Mat2_without_subtoa_anchor[res2$idx,]
+    idx=which(m1_merged_without_atosub[,'protein.accession'] %in% Mat2_without_subtoa_anchor[res2$idx,'protein.accession'])
+    uniAnchortoTrinityOverlap=m1_merged_without_atosub[which(m1_merged_without_atosub[,'PAG.ID'] %in% m1_merged_without_atosub[idx,'PAG.ID']),]
+    anchorToSubOverlap=rbind(trinityAnchortoUniSubOverlap,uniAnchortoTrinityOverlap)
+    
+    overlapMat=rbind(a_to_mapped_pags,anchorToSubOverlap)
+    print("a_to_a")
+    print(dim(a_to_a))
+    print("res$count")
+    print(res$count)
+    print("res2$count")
+    print(res2$count)
+}
+
 PAG_overlap_Main <- function(f1,f2,f3,d1,d2,d3,rev=1,peptide=1,pepThreshold=1,upper=0.1, Mat1FileNamePostfix, Mat2FileNamePostfix)
 {
     Mat=readMatsAndPostProcess(f1,f2,f3,d1,d2,d3,rev,peptide,pepThreshold,upper)

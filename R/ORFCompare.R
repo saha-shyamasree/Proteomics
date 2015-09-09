@@ -45,6 +45,12 @@ boxPlotIdentifiedORFs<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Na
     tiff(filename = paste(outDir,Mat1Name,"_",Mat2Name,"IdentifiedORFs.tiff",sep=""), width = 480, height = 480, compression = c("none"), bg = "white")
     p2
     dev.off()
+    ##violin plot
+    p2=ggplot(mergedL_melted, aes( factor( Software ), Length, colour=Software ) )
+    p2=p2+ geom_violin()
+    p2=p2+xlab("Database Source")
+    p2=p2+ ylab("Length")
+    p2=p2 + ggtitle("Identified ORFs Length")
 }
 
 boxPlotIdentifiedUniprotHomologousORFs<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Name, outDir, upper)
@@ -67,6 +73,12 @@ boxPlotIdentifiedUniprotHomologousORFs<-function(Mat1, Mat2, blastDB1, blastDB2,
     tiff(filename = paste(outDir,Mat1Name,"_",Mat2Name,"IdentifiedUniprotHomologousORFs.tiff",sep=""), width = 480, height = 480, compression = c("none"), bg = "white")
     p2
     dev.off()
+    ##violin plot
+    p2=ggplot(mergedL_melted, aes( factor( Software ), Length, colour=Software ) )
+    p2=p2+ geom_violin()
+    p2=p2+xlab("Database Source")
+    p2=p2+ ylab("Length")
+    p2=p2 + ggtitle("Identified ORFs-Hommologues to Uniprot Length")
 }
 
 boxPlotIdentifiedUniprotHomologousORFsLongMatch<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Name, outDir, upper)
@@ -90,6 +102,12 @@ boxPlotIdentifiedUniprotHomologousORFsLongMatch<-function(Mat1, Mat2, blastDB1, 
     tiff(filename = paste(outDir,Mat1Name,"_",Mat2Name,"IdentifiedUniprotHomologousORFsLongMatch.tiff",sep=""), width = 480, height = 480, compression = c("none"), bg = "white")
     p2
     dev.off()
+    ##violin plot
+    p2=ggplot(mergedL_melted, aes( factor( Software ), LengthRatio, colour=Software ) )
+    p2=p2+ geom_violin()
+    p2=p2+xlab("Database Source")
+    p2=p2+ ylab("Length")
+    p2=p2 + ggtitle("Identified ORFs-Hommologues to Uniprot Long match")
 }
 
 boxPlotIdentifiedUniprotHomologousORFsLengthRatio<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Name, outDir, upper)
@@ -111,7 +129,20 @@ boxPlotIdentifiedUniprotHomologousORFsLengthRatio<-function(Mat1, Mat2, blastDB1
     colnames(mergedL_melted)=c('SerialNo','Software','LengthRatio')
     print(maxLen)
     ##box plot
-    p2 <- ggplot(mergedL_melted, aes( factor( Software ), LengthRatio, colour=Software ) ) +xlab("Database Source") + ylab("Length Ratio") + geom_boxplot() + ggtitle("Identified ORFs Length Ratio against the Uniprot")
+    p2=ggplot(mergedL_melted, aes( factor( Software ), LengthRatio, colour=Software ) )
+    p2=p2+ geom_boxplot()
+    p2=p2+xlab("Database Source")
+    p2=p2+ ylab("Length Ratio")
+    p2=p2 + ggtitle("Identified ORFs Length Ratio against the Uniprot")
+    tiff(filename = paste(outDir,Mat1Name,"_",Mat2Name,"IdentifiedUniprotHomologousORFsLengthRatio.tiff",sep=""), width = 480, height = 480, compression = c("none"), bg = "white")
+    p2
+    dev.off()
+    ##violin
+    p2=ggplot(mergedL_melted, aes( factor( Software ), LengthRatio, colour=Software ) )
+    p2=p2+ geom_violin()
+    p2=p2+xlab("Database Source")
+    p2=p2+ ylab("Length Ratio")
+    p2=p2 + ggtitle("Identified ORFs Length Ratio against the Uniprot")
     tiff(filename = paste(outDir,Mat1Name,"_",Mat2Name,"IdentifiedUniprotHomologousORFsLengthRatio.tiff",sep=""), width = 480, height = 480, compression = c("none"), bg = "white")
     p2
     dev.off()
