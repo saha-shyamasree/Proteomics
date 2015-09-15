@@ -37,7 +37,7 @@ print(args)
 
 #subprocess.call(["perl /data/home/btw796/Code/Proteomics/Perl/orfall.pl", "-h"])
 sp.check_output(["cd",args.msgf_path], shell=True, stderr=subprocess.STDOUT)
-sp.check_output(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar")#,"D:\Code\Proteomics\Perl\orfall.pl",args.input,args.output])
+sp.check_output(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar"])#,"D:\Code\Proteomics\Perl\orfall.pl",args.input,args.output])
 
 
 '''
