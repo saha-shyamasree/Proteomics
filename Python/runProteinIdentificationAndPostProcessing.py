@@ -14,6 +14,7 @@ parser.add_argument("--m_msgf", default=1, help="", metavar="Integer")
 parser.add_argument("--inst", default=1,help="")
 parser.add_argument("--minLength", default=8, help="minimum peptide length", metavar="LENGTH")
 parser.add_argument("--msgf_path", default="/data/home/btw796/Prog/MSGF+/",help="msgf+ jar file location", metavar="PATH")
+#parser.add_argument("--msgf_path", default="C:/soft/MSGFPlus.20140210/",help="msgf+ jarfile location", metavar="PATH")
 #parser.add_option("--min3", help="the minimum length of 3' uORFs, only works when -uorf3output is set", metavar="Integer")
 
 args = parser.parse_args()
@@ -36,8 +37,10 @@ print(args)
 '''
 
 #subprocess.call(["perl /data/home/btw796/Code/Proteomics/Perl/orfall.pl", "-h"])
-sp.check_output(["cd",args.msgf_path], shell=True, stderr=subprocess.STDOUT)
-sp.check_output(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar"])#,"D:\Code\Proteomics\Perl\orfall.pl",args.input,args.output])
+directoryMSG=sp.check_output(["cd",args.msgf_path], shell=True, stderr=sp.STDOUT)
+print(directoryMSG)
+msgfMSG=sp.check_output(["java", "-Xmx12000M", "-jar", args.msgf_path+"MSGFPlus.jar"])#,"D:\Code\Proteomics\Perl\orfall.pl",args.input,args.output])
+print(msgfMSG)
 
 
 '''
@@ -47,3 +50,4 @@ java -Xms8024m -jar mzidentml-lib.jar Threshold I:\Human-Hendra\SearchEngine\MSG
 java -Xms4024m -jar mzidentml-lib.jar ProteoGrouper I:\Human-Hendra\SearchEngine\MSGF+\trinity+fdr+th.mzid I:\Human-Hendra\SearchEngine\MSGF+\trinity+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
 java -Xms4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Hendra\SearchEngine\MSGF+\trinity+fdr+th+grouping.mzid I:\Human-Hendra\SearchEngine\MSGF+\trinity+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
 java -Xms4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Hendra\SearchEngine\MSGF+\trinity+fdr+th+grouping.mzid I:\Human-Hendra\SearchEngine\MSGF+\trinity+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
+'''
