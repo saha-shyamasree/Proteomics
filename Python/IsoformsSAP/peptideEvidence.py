@@ -20,6 +20,7 @@
 ##  Variation<#############> Petide
 ##           [Many to Many]
 
+##### NOTE: Try using 'isin' function, rather than the groupby. It may speed up the process.
 
 import pandas as pd
 import csv
@@ -386,6 +387,14 @@ def readFile(filename, sep):
     fileDFObj = pd.read_table(filename, sep=sep, keep_default_na=False, na_values=[''])
     return fileDFObj;
 
+def pepThresholding(prots,pepTh):
+    print("1. prots dim:"+str(prots.shape))
+    prots=prots[~prots['protein accession'].str.contains("_REVERSED")]
+    print("2. prots dim:"+str(prots.shape))
+    prots=prots[prots['distinct peptide sequences']>pepTh]
+    print("3. prots dim:"+str(prots.shape))
+    return prots
+
 def main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName):
     ##read peptide identification file
     PSMs=readFile(PSMFileName, ',')
@@ -396,8 +405,17 @@ def main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName):
     with open(newVcfFileName, 'w') as newVcfFile, open(newPSMFileName, 'w') as newPSMFile:
         findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile)
 
+def findProtein(prots,ORFId):
+    ##
+    return prots['protein accession'].isin([ORFId]).sum()
 
-def subsettingIdentifiedORFVariation(vcf, PSMs, subVcfFileName):
+def subsettingIdentifiedORFVariation(ProtFileName, vcfFileName, subVcfFileName,pepCount):
+    ##read peptide identification file
+    pepTh=pepCount
+    prots=pepThresholding(readFile(ProtFileName, ','),pepTh)
+    ##read vcf file
+    vcf=readFile(vcfFileName,'\t')
+    
     ## vcf file fields: Chr, POS within Protein,ID, REF, ALT, INFO(SubjectId=P09417-2;QueryId=Dataset_A_asmbl_41426_ORF20_Frame_3_84-446;Alignment=[QueryLength=121:QueryStart=1:QueryEnd=116:SubjectLength=213:SubjectStart=1:SubjectEnd=116];Type:SSAP;QPOS:116)
     ## split the INFO column and add them to main data frame
     info=pd.DataFrame(vcf.INFO.str.split(';').tolist(),columns=['SubjectID','QueryID','Alignment','Type','QPOS'])
@@ -405,7 +423,7 @@ def subsettingIdentifiedORFVariation(vcf, PSMs, subVcfFileName):
     vcf=vcf.join(info)
     vcf.SubjectID=vcf.SubjectID.str.replace('SubjectId=','')
     vcf.QueryID=vcf.QueryID.str.replace('QueryId=','')
-    print(vcf.QueryID[0:5])
+    #print(vcf.QueryID[0:5])
     vcf.Alignment=vcf.Alignment.str.replace('Alignment=\[','')
     vcf.Alignment=vcf.Alignment.str.replace('\]','')
     vcf.Type=vcf.Type.str.replace('Type:','')
@@ -413,10 +431,9 @@ def subsettingIdentifiedORFVariation(vcf, PSMs, subVcfFileName):
     ##groups vcf entries by ORF/Query ids.
     vcfGrouped=vcf.groupby('QueryID')
     
-    ##in the same way group the PSMs according to the prptide sequence.
-    peptideGrouped=PSMs.groupby('Sequence')
     # each of these group represents all the SAPs/ALTs/INDELs for a ORF/Query
     headerFlag=1
+    print(prots.columns.values)
     with open(subVcfFileName, 'w') as subVcfFile:
         for name, variations in vcfGrouped:
             ## check whether this ORF has been identified and whether this SAP/ALT/INDEL event has a peptide evidence.
@@ -428,20 +445,26 @@ def subsettingIdentifiedORFVariation(vcf, PSMs, subVcfFileName):
             ## find peptide evidence of this ORF
             print("ORFId:"+ORFId)
             
-            PSMsOfORF=groupPeptide(peptideGrouped, ORFId)
-            if len(PSMsOfORF)>0:    
+            varOfORF=findProtein(prots,ORFId)##value should be binary
+            print("Identified:"+str(varOfORF))
+            if varOfORF>0:    
                 ##For each entry in the query, which is essentially the variations, check overlap between the variation and these peptide.
-                printValidatedVariations(variation, newVcfFile,headerFlag,1)
+                for i in range(len(variations)):
+                    variation=variations.iloc[i]
+                    printValidatedVariations(variation, subVcfFile, headerFlag,0)
+                    headerFlag=0
             else:
                 print(ORFId+" was not identified")
-            
+        
 PSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+grouping.csv"
-vcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
+ProtFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+grouping+prt.csv"
+#vcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
 
 ## New Files
-vcfIdentifiedProteins="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_VariationV7IdentifiedOnly.vcf"
-newPSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+groupingVariationEvidence.csv"
-newVcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7PeptideEvidence.vcf"
+#vcfIdentifiedProteins="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_VariationV7IdentifiedPep2Only.vcf"
+newPSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+groupingVariationEvidencePep2.csv"
+newVcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7PeptideEvidencePep2.vcf"
+subVcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IdentifiedORFsVariationPep2.vcf"
 '''
 PSMFileName="pepTest.csv"
 vcfFileName="vcfTest.vcf"
@@ -450,4 +473,6 @@ vcfFileName="vcfTest.vcf"
 newPSMFileName="pepVariationEvidence.csv"
 newVcfFileName="vcfPeptideEvidence.vcf"
 '''
-main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName)
+pepCount=1
+#subsettingIdentifiedORFVariation(ProtFileName, vcfFileName, subVcfFileName, pepCount)
+main(PSMFileName, subVcfFileName, newVcfFileName, newPSMFileName)
