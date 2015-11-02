@@ -1,0 +1,12 @@
+:::::Identified:::::
+Total number of ORFs:333
+Total numbber of SAAVs/SAPs [SSAPs+SAPs]:635 [320+635]
+Total number of ALTs [SALT/ALT]:178 [43+178]
+Total number of Insertion:113
+Total number of Deletion:181
+:::::Peptide Evidence:::::
+Total number of ORFs:39
+Total numbber of SAAVs/SAPs [SSAPs+SAPs]:74 [45+74]
+Total number of ALTs [SALT/ALT]:8 [6+8]
+Total number of Insertion:10
+Total number of Deletion:6

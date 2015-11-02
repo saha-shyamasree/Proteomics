@@ -1,0 +1,77 @@
+nonCDS:40
+nonCDS:20
+nonCDS:36
+nonCDS:1
+nonCDS:4
+nonCDSPSMs:692
+nonCDSPep:194
+nonCDSUniqPep:82
+nonCDSPSMs:376
+nonCDSPep:80
+nonCDSUniqPep:22
+nonCDSPSMs:402
+nonCDSPep:153
+nonCDSUniqPep:19
+nonCDSPSMs:6
+nonCDSPep:2
+nonCDSUniqPep:0
+nonCDSPSMs:9
+nonCDSPep:4
+nonCDSUniqPep:0
+Known Protein
+res1[10, 2, 5, 0, 0]
+Pep:53
+UnqPep:31
+Pep:29
+UnqPep:22
+Pep:10
+UnqPep:4
+Pep:0
+UnqPep:0
+Pep:0
+UnqPep:0
+Known Protein with Var
+res2[2, 0, 4, 0, 0]
+Pep:4
+UnqPep:0
+Pep:0
+UnqPep:0
+Pep:19
+UnqPep:0
+Pep:0
+UnqPep:0
+Pep:0
+UnqPep:0
+Isoform
+res3[24, 11, 22, 0, 2]
+Pep:125
+UnqPep:51
+Pep:30
+UnqPep:0
+Pep:110
+UnqPep:15
+Pep:0
+UnqPep:0
+Pep:2
+UnqPep:0
+Isoform with Var
+res4[3, 5, 4, 1, 2]
+Pep:10
+UnqPep:0
+Pep:16
+UnqPep:0
+Pep:12
+UnqPep:0
+Pep:2
+UnqPep:0
+Pep:2
+UnqPep:0
+res1PSM:[130, 49, 15, 0, 0]
+res2PSM:[40, 0, 56, 0, 0]
+res3PSM:[341, 246, 300, 0, 3]
+res4PSM:[175, 64, 26, 6, 6]
+NMD,PT,RI,ANTI,LINC
+,Pep:141|UniqPep:51,Pep:51|UniqPep:0,Pep:143|UniqPep:15,Pep:2|UniqPep:0,Pep:4|UniqPep:0
+,Pep:137|UniqPep:51,Pep:51|UniqPep:0,Pep:124|UniqPep:15,Pep:2|UniqPep:0,Pep:4|UniqPep:0
+,Pep:12|UniqPep:0,Pep:21|UniqPep:0,Pep:14|UniqPep:0,Pep:2|UniqPep:0,Pep:2|UniqPep:0
+,Pep:2|UniqPep:0,Pep:5|UniqPep:0,Pep:2|UniqPep:0,Pep:0|UniqPep:0,Pep:0|UniqPep:0

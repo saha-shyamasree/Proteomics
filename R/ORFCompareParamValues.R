@@ -5,7 +5,7 @@ upper=0.000000000000000000000000000001
 pepThreshold=1
 rev=1
 peptide=1
-
+len=66
 ####################################################  TrinityV5 Vs PASA ################################################
 f2="pasa_assemblyV1+fdr+th+grouping+prt.csv"
 f1="trinity_PITORF+fdr+th+grouping+prtV5.csv"
@@ -18,5 +18,8 @@ d3="D:/data/blast/blastCSV/sORF/"
 Mat1Name="TrinityV5"
 Mat2Name="PASA"
 outDir="D:/data/PASA/human_adeno/Stats/"
-p2=lengthComparison(f1,f2,f3,f4,d1,d2,d3,d4,rev,peptide,pepThreshold,upper, Mat1Name, Mat2Name, outDir)
+Mats=lengthComparison(f1,f2,f3,f4,d1,d2,d3,d4,rev,peptide,pepThreshold,upper, Mat1Name, Mat2Name, outDir)
 
+tTest(Mats$Mat1, Mats$Mat2, Mats$blastDB1, Mats$blastDB2,Mat1Name, Mat2Name, outDir, upper)
+
+sORFCount(Mats$Mat1, Mats$Mat2, Mats$blastDB1, Mats$blastDB2,Mat1Name, Mat2Name, outDir, upper,len)

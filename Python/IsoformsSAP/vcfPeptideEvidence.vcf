@@ -1,0 +1,4 @@
+#Chr	POS within Protein	ID	REF	ALT	INFO
+12	287	310149.1	T	S	SubjectId=Q9BQE3;QueryId=Dataset_A_asmbl_13329_ORF25_Frame_3_117-1469;Alignment=[QueryLength=451:QueryStart=1:QueryEnd=451:SubjectLength=449:SubjectStart=1:SubjectEnd=449];Type:SSAP;QPOS:287;PeptideCount:1;UniquePeptideCount:1;Peptides:AYHEQLSVAEITNACFEPANQMVK;Score:1
+9	228	227605.1	M	L	SubjectId=Q9UMX0-2;QueryId=Dataset_A_asmbl_58691_ORF8_Frame_2_20-631;Alignment=[QueryLength=204:QueryStart=1:QueryEnd=204:SubjectLength=561:SubjectStart=198:SubjectEnd=405];Type:SSAP;QPOS:31;PeptideCount:1;UniquePeptideCount:1;Peptides:NPEISHLLNNPDIMR;Score:1
+9	257	227605.3	R	L	SubjectId=Q9UMX0-2;QueryId=Dataset_A_asmbl_58691_ORF8_Frame_2_20-631;Alignment=[QueryLength=204:QueryStart=1:QueryEnd=204:SubjectLength=561:SubjectStart=198:SubjectEnd=405];Type:SAP;QPOS:60;PeptideCount:1;UniquePeptideCount:1;Peptides:NQDLALSNLESIPGGYNALR;Score:1

@@ -3,6 +3,7 @@
 
 import pandas as pd
 import re
+import os
 
 def readList(filename, sep):
     fileDFObj = pd.read_table(filename, sep=sep)
@@ -26,6 +27,9 @@ def subsetProteins(Mat1, MatList, column1):
         #print(colnames)
         subCount[i]=Mat2['description'].isin(Mat1[column1]).sum()
         subMats[i]=Mat2[~Mat2['description'].isin(Mat1[column1])]
+        print("Main ORF:"+str(subMats[i]['description'].str.contains("Dataset_A").sum()))
+        print("3'uORF:"+str(subMats[i]['description'].str.contains("Dataset_C").sum()))
+        print("5'uORF:"+str(subMats[i]['description'].str.contains("Dataset_B").sum()))
     return {'Count':subCount,'Matrix':subMats}
 
 def subsetPSMs(Mat1List, Mat2List, column1):
@@ -57,8 +61,41 @@ def subsetPSMs(Mat1List, Mat2List, column1):
             print("UnqPep:"+str(len(temp[~temp['proteinacc_start_stop_pre_post_.'].str.contains(";")]['Sequence'].unique())))
             subMats[i]=Mat2[Mat2['proteinacc_start_stop_pre_post_.'].str.contains(Mat1Str)]
     return {'Count':subCount,'Matrix':subMats}
+def mergedFile(res1,res1PSM, nonCDSPrtOutFileNameList,nonCDSPSMOutFileNameList):
+    print("DirName:"+str(os.path.dirname(nonCDSPrtOutFileNameList[0])))
+    mergedPrtFile=open(os.path.dirname(nonCDSPrtOutFileNameList[0])+"/nonCodingPrt.tsv",'w')
+    mergedPSMFile=open(os.path.dirname(nonCDSPSMOutFileNameList[0])+"/nonCodingPSM.tsv",'w')
+    for i in range(len(nonCDSPrtOutFileNameList)):
+        res1['Matrix'][i].to_csv(nonCDSPrtOutFileNameList[i],sep='\t',index=False)
+        res1PSM['Matrix'][i].to_csv(nonCDSPSMOutFileNameList[i],sep='\t',index=False)
+        classCol=[]
+        if i==0:
+            classCol=['Non-sence mediated decay']
+        elif i==1:
+            classCol=['Processed transcript']
+        elif i==2:
+            classCol=['Retained intron']
+        elif i==3:
+            classCol=['Anti-sense']
+        elif i==4:
+            classCol=['lincRNA']
+        prot=res1['Matrix'][i]
+        psm=res1PSM['Matrix'][i]
+        infoProt=pd.DataFrame(classCol*prot.shape[0],columns=['NonProteinCodingClass'],index=prot.index)
+        infoPSM=pd.DataFrame(classCol*psm.shape[0],columns=['NonProteinCodingClass'],index=psm.index)
+        prot=prot.join(infoProt)
+        psm=psm.join(infoPSM)
+        if i==0:
+            prot.to_csv(mergedPrtFile,sep='\t',index=False)
+            psm.to_csv(mergedPSMFile,sep='\t',index=False)
+        else:
+            prot.to_csv(mergedPrtFile,sep='\t', header=False, index=False)
+            psm.to_csv(mergedPSMFile,sep='\t', header=False, index=False)
+    mergedPSMFile.close()
+    mergedPrtFile.close()
 
-def main(knownPro, knownProSAP, iso, isoSAP, nonCDSFilenameList, nonCDSPSMFileNameList):
+    
+def main(knownPro, knownProSAP, iso, isoSAP, nonCDSFilenameList, nonCDSPSMFileNameList, nonCDSPrtOutFileNameList,nonCDSPSMOutFileNameList):
     ## Read a) known proteins, b) known proteins with SAPs including ALT/INDELs, c) isoforms, and d) isoforms with SAPs/ALT/INDELs
     
     ## Known Protein
@@ -93,8 +130,9 @@ def main(knownPro, knownProSAP, iso, isoSAP, nonCDSFilenameList, nonCDSPSMFileNa
     res1=subsetProteins(knownProteins,nonCDS,'ORF Id')
     print("res1"+str(res1['Count']))
     res1PSM=subsetPSMs(res1['Matrix'], nonCDSPSMs, 'protein.accession')
-    
     print("Known Protein with Var")
+    mergedFile(res1,res1PSM, nonCDSPrtOutFileNameList,nonCDSPSMOutFileNameList)
+   
     res2=subsetProteins(knownProteinsSAPs,res1['Matrix'],'ORF Id')
     print("res2"+str(res2['Count']))
     res2PSM=subsetPSMs(res2['Matrix'], res1PSM['Matrix'], 'protein.accession')
@@ -143,14 +181,30 @@ knownProSAP="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assem
 iso="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV7.csv"
 isoSAP="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV7.csv"
 
-nonCDSPrtFileNameList=["D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/nonsense_mediated_decayPrt.tsv","D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/processed_transcriptPrt.tsv","D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/retained_intronPrt.tsv","D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/antisensePrt.tsv","D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/lincPrt.tsv"]
+nonCDSPrtFileNameList=["D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/nonsense_mediated_decayPrt.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/processed_transcriptPrt.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/retained_intronPrt.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/antisensePrt.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/lincPrt.tsv"]
+
+nonCDSPrtOutFileNameList=["D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/nonsense_mediated_decayPrt2.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/processed_transcriptPrt2.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/retained_intronPrt2.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/antisensePrt2.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/lincPrt2.tsv"]
+
 nonCDSPSMFileNameList=["D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/nonsense_mediated_decay.tsv",
                        "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/processed_transcript.tsv",
                        "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/retained_intron.tsv",
                        "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/antisense.tsv",
                        "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/linc.tsv"]
+nonCDSPSMOutFileNameList=["D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/nonsense_mediated_decay2.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/processed_transcript2.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/retained_intron2.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/antisense2.tsv",
+                       "D:/data/Results/Human-Adeno/Identification/PASA/sORF/bioTypeClassification/linc2.tsv"]
 nonCDSFilenameList=nonCDSPrtFileNameList
-allres=main(knownPro, knownProSAP, iso, isoSAP, nonCDSPrtFileNameList,nonCDSPSMFileNameList)
+allres=main(knownPro, knownProSAP, iso, isoSAP, nonCDSPrtFileNameList,nonCDSPSMFileNameList,nonCDSPrtOutFileNameList,nonCDSPSMOutFileNameList)
 '''
 print("All Res:"+str(allres[3]['Count']))
 for i in range(len(allres[3]['Matrix'])):

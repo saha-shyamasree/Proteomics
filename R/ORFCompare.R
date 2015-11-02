@@ -147,13 +147,62 @@ boxPlotIdentifiedUniprotHomologousORFsLengthRatio<-function(Mat1, Mat2, blastDB1
     p2
     dev.off()
 }
+tTest<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Name, outDir, upper)
+{
+    Mat1IdentifiedBlast=blastDB1[which(blastDB1[,'query_name'] %in% Mat1[,'protein.accession']),]
+    Mat2IdentifiedBlast=blastDB2[which(blastDB2[,'query_name'] %in% Mat2[,'protein.accession']),]
+    
+    Mat1IdenfiedORFsSub=blastFilterEval(blastFilterMatch(Mat1IdentifiedBlast,1),upper)[,c('query_length','hit_length')]
+    Mat2IdenfiedORFsSub=blastFilterEval(blastFilterMatch(Mat2IdentifiedBlast,1),upper)[,c('query_length','hit_length')]
+    Mat1IdenfiedORFsLengthRatio=Mat1IdenfiedORFsSub[,'query_length']/Mat1IdenfiedORFsSub[,'hit_length']
+    Mat2IdenfiedORFsLengthRatio=Mat2IdenfiedORFsSub[,'query_length']/Mat2IdenfiedORFsSub[,'hit_length']
+    print("Length Ratio")
+    print(t.test(Mat1IdenfiedORFsLengthRatio,Mat2IdenfiedORFsLengthRatio))
+    
+    Mat1IdenfiedORFsLenth=blastFilterEval(blastFilterMatch(Mat1IdentifiedBlast,1),upper)[,'query_length']
+    Mat2IdenfiedORFsLenth=blastFilterEval(blastFilterMatch(Mat2IdentifiedBlast,1),upper)[,'query_length']
+    print("Length")
+    print(t.test(Mat1IdenfiedORFsLenth,Mat2IdenfiedORFsLenth))
+    
+    Mat1IdenfiedORFsLong=blastFilterEval(blastFilterMatch(Mat1IdentifiedBlast,1),upper)[,'long_match']
+    Mat2IdenfiedORFsLong=blastFilterEval(blastFilterMatch(Mat2IdentifiedBlast,1),upper)[,'long_match']
+    print("Long Match")
+    t.test(Mat1IdenfiedORFsLong,Mat2IdenfiedORFsLong)
+}
+
+sORFCount<-function(Mat1, Mat2, blastDB1, blastDB2, Mat1Name, Mat2Name, outDir, upper, len)
+{
+    Mat1IdentifiedBlast=blastDB1[which(blastDB1[,'query_name'] %in% Mat1[,'protein.accession']),]
+    Mat2IdentifiedBlast=blastDB2[which(blastDB2[,'query_name'] %in% Mat2[,'protein.accession']),]
+    
+    sORFMat1=Mat1IdentifiedBlast[which(Mat1IdentifiedBlast[,'query_length']<len),]
+    sORFMat2=Mat2IdentifiedBlast[which(Mat2IdentifiedBlast[,'query_length']<len),]
+    
+    print("Mat1 sORF")
+    print(dim(sORFMat1))
+    print("Mat2 sORF")
+    print(dim(sORFMat2))
+    
+    print("Mat1 sORF: 3'uORF")
+    print(length(grep("^Dataset_C",sORFMat1[,'query_name'])))
+    print("Mat2 sORF: 3'uORF")
+    print(length(grep("^Dataset_C",sORFMat2[,'query_name'])))
+    
+    print("Mat1 sORF: 5'uORF")
+    print(length(grep("^Dataset_B",sORFMat1[,'query_name'])))
+    print("Mat2 sORF: 5'uORF")
+    print(length(grep("^Dataset_B",sORFMat2[,'query_name'])))
+}
+
+
 
 lengthComparison<-function(f1,f2,f3,f4,d1,d2,d3,d4,rev=1,peptide=1,pepThreshold=1, upper=0.1, Mat1Name, Mat2Name, outDir)
 {
     Mats=readMatrices(f1,f2,f3,f4,d1,d2,d3,d4,rev,peptide,pepThreshold)
     #boxPlotIdentifiedORFs(Mats$Mat1, Mats$Mat2, Mats$blastDB1, Mats$blastDB2,Mat1Name, Mat2Name, outDir)
     #boxPlotIdentifiedUniprotHomologousORFsLongMatch(Mats$Mat1, Mats$Mat2, Mats$blastDB1, Mats$blastDB2,Mat1Name, Mat2Name, outDir, upper)
-    boxPlotIdentifiedUniprotHomologousORFsLengthRatio(Mats$Mat1, Mats$Mat2, Mats$blastDB1, Mats$blastDB2,Mat1Name, Mat2Name, outDir, upper)
+    #boxPlotIdentifiedUniprotHomologousORFsLengthRatio(Mats$Mat1, Mats$Mat2, Mats$blastDB1, Mats$blastDB2,Mat1Name, Mat2Name, outDir, upper)
+    Mats
 }
 
 ### this code compares ORFs to Uniprot proteins blast result, where ORFs are generated from either trinity assebled transcripts or PASA assemblies.

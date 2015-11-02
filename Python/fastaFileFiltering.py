@@ -6,12 +6,16 @@ import argparse
 import csv
 
 parser = argparse.ArgumentParser(description='Fasta file filtering based on a header list given')
-parser.add_argument("fastaFile", help="fasta file name")
-parser.add_argument("chosenIds", help="Fasta header list file name, headers should be newline separated")
+parser.add_argument("-f","--fastaFile", help="fasta file name")
+parser.add_argument("-l","--chosenIds", help="Fasta header list file name, headers should be newline separated")
 args = parser.parse_args()
 
-fastahandle = open(sys.argv[1], "rU")
-headerhandle = open(sys.argv[2], "rU")
+#fastahandle = open(sys.argv[1], "rU")
+#headerhandle = open(sys.argv[2], "rU")
+
+fastahandle = open(args.fastaFile, "rU")
+headerhandle = open(args.chosenIds, "rU")
+
 overlapping_ids = list(headerhandle)
 overlapping_ids[:] = [line.strip() for line in overlapping_ids]
 overlapping_ids[:] = [line.replace('"','') for line in overlapping_ids]
