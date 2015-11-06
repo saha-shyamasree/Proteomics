@@ -14,7 +14,7 @@ parser.add_argument("--m_msgf", default=1, help="", metavar="Integer")
 parser.add_argument("--inst", default=1,help="")
 parser.add_argument("--minLength", default=8, help="minimum peptide length", metavar="LENGTH")
 parser.add_argument("--msgf_path", default="/data/home/btw796/Prog/MSGF+/",help="msgf+ jar file location", metavar="PATH")
-#parser.add_argument("--msgf_path", default="C:/soft/MSGFPlus.20140210/",help="msgf+ jarfile location", metavar="PATH")
+parser.add_argument("--mzident_path", default="/data/home/btw796/Prog/MzidLib-1.6/",help="mzidentml-lib jarfile location", metavar="PATH")
 #parser.add_option("--min3", help="the minimum length of 3' uORFs, only works when -uorf3output is set", metavar="Integer")
 
 args = parser.parse_args()
@@ -38,7 +38,7 @@ print(args)
 
 #subprocess.call(["perl /data/home/btw796/Code/Proteomics/Perl/orfall.pl", "-h"])
 directoryMSG=sp.check_output(["cd",args.msgf_path], shell=True, stderr=sp.STDOUT)
-print(directoryMSG)
+print(""+directoryMSG)
 msgfMSG=sp.check_output(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar"])#,"D:\Code\Proteomics\Perl\orfall.pl",args.input,args.output])
 print(msgfMSG)
 
