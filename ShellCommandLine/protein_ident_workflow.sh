@@ -41,6 +41,7 @@ java -Xms1024m -jar mzidentml-lib.jar Mzid2Csv G:\SearchEngine_output\MSGF+\DM_f
 ### PITORFAll
 Supplementary_dataset_1_-_human_trinity_assembled_transcripts-ORF_concatenated_target_decoy
 
+##shortest main orf-200bp
 java -Xmx8500M -jar MSGFPlus.jar -s C:\Data\HUMAN\mgf\DM_from_raw.mgf -d E:\Data\HUMAN\database\Trinity\Supplementary_dataset_1_-_human_trinity_assembled_transcripts-ORF_concatenated_target_decoy.fasta -o G:\SearchEngine_output\MSGF+\trinity_PITORF.mzid -mod C:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8 
 java -Xms1024m -jar mzidentml-lib.jar FalseDiscoveryRate G:\SearchEngine_output\MSGF+\trinity_PITORF.mzid G:\SearchEngine_output\MSGF+\trinity_PITORF+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true
 java -Xms1024m -jar mzidentml-lib.jar Threshold G:\SearchEngine_output\MSGF+\trinity_PITORF+fdr.mzid G:\SearchEngine_output\MSGF+\trinity_PITORF+fdr+th.mzid -isPSMThreshold true -cvAccessionForScoreThreshold MS:1002355 -threshValue 0.01  -betterScoresAreLower true -deleteUnderThreshold true
@@ -201,6 +202,10 @@ java -Xmx8024m -jar mzidentml-lib.jar Threshold I:\Human-Adenovirus\ProteinIdent
 java -Xmx4024m -jar mzidentml-lib.jar ProteoGrouper I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th.mzid I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping.mzid -cvAccForSIIScore MS:1002355 -logTransScore true -requireSIIsToPassThreshold true  -verboseOutput false
 java -Xmx4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping.mzid I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping.csv -exportType  exportPSMs  -compress false
 java -Xmx4024m -jar mzidentml-lib.jar Mzid2Csv I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping.mzid I:\Human-Adenovirus\ProteinIdent\pasa_assemblyV1+fdr+th+grouping+prt.csv -exportType  exportProteinsOnly  -compress false
+
+############################################ Mosquito with aedes virus #########################################################
+###on cluster
+perl orfall.pl /data/SBCS-BessantLab/shyama/Data/Bristol/Mosquito/Trinity/aedesTrinity.fasta /data/SBCS-BessantLab/shyama/Data/Bristol/Mosquito/Trinity/aedesTrinity_ORF.fasta
 
 
 #######################################################################################################################

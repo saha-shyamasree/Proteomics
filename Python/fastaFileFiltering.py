@@ -19,15 +19,18 @@ headerhandle = open(args.chosenIds, "rU")
 overlapping_ids = list(headerhandle)
 overlapping_ids[:] = [line.strip() for line in overlapping_ids]
 overlapping_ids[:] = [line.replace('"','') for line in overlapping_ids]
-print("oids:"+str(len(overlapping_ids)))
+#print("oids:"+str(len(overlapping_ids)))
+#print(overlapping_ids[0])
 records = list(SeqIO.parse(fastahandle, "fasta"))
 #print("Total=")
 #print(len(records))
 count1=0
 count2=0
 for record in records: # SeqIO.parse(handle, "fasta")
-    if record.id in overlapping_ids:
-        overlapping_ids.remove(record.id)
+    #print(record.description)
+    #print("TESTTEST")
+    if record.description in overlapping_ids:
+        overlapping_ids.remove(record.description)
         count1=count1+1
         print(">"+record.description)
         print(record.seq)
@@ -36,6 +39,6 @@ for record in records: # SeqIO.parse(handle, "fasta")
 fastahandle.close()
 headerhandle.close()
 #print(overlapping_ids)
-print("Count:"+str(count1))
+#print("Count:"+str(count1))
 #C:\Users\shyama\Dropbox\results\Bat_human_hendra\Human\trinity_only.fasta
     

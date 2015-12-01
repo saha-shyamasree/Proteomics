@@ -8,6 +8,7 @@
 import os
 import csv
 import re
+import argparse
 from AminoAcidVariation import AminoAcidVariation
 
 def checkMatch(data, value):
@@ -393,6 +394,8 @@ def findSAPsAndINDELs(qSeq, sSeq, mSeq, sId, qId, chromosome, alignInfo):
     return aaVariationList;
 
 def classify(line, matchCol, evalTheshold,evalCol, gTh, gCol, lCol, qLenCol, sLenCol, qSeqCol, sSeqCol, mSeqCol, qSt, qEnd, sSt, sEnd, sId, qId, chromosome, SAPFileWriter, count, knownProteinFile, knownProteinSAPFile, isoformsFile, isoformsSAPsFile):
+    #print(line)
+    sapDiff=2
     mStr=line[matchCol].strip()
     #print("in classify '"+mStr+"'")
     if checkMatch(mStr,'yes')==1:
@@ -405,7 +408,12 @@ def classify(line, matchCol, evalTheshold,evalCol, gTh, gCol, lCol, qLenCol, sLe
             if floatMatchCheck(float(line[gCol]),1)==1: # This means aligned seq is perfect, hence SAP within the alignment is possible, only if query/subject length is 1 or 2 AA longer.
                 if floatMatchCheck(float(line[lCol]),1)==1: #this means identities/hit_length=1, here, it means that query is longer than the subject. Candidate for Isoform.
                     print(line[qId]+" is possibly an isoform of "+line[sId])
-                    isoformsFile.write(line[qId]+","+line[sId]+",LongORF\n")
+                    if abs(int(line[qLenCol])-int(line[sLenCol]))<=sapDiff:
+                        print("small length difference")
+                        print("knownProteinSap")
+                        knownProteinSAPFile.write(line[qId]+","+line[sId]+"\n")
+                    else:
+                        isoformsFile.write(line[qId]+","+line[sId]+",LongORF\n")
                 elif lengthRatioCheck(float(line[qLenCol]),float(line[sLenCol]))==1:
                     print(line[qId]+" and "+line[sId]+" are of same length and partially aligned perfectly. Candidate for Isoform")
                     isoformsFile.write(line[qId]+","+line[sId]+",PartialSameLength\n")
@@ -420,6 +428,7 @@ def classify(line, matchCol, evalTheshold,evalCol, gTh, gCol, lCol, qLenCol, sLe
                 pId=re.search('(?:\|)(.+?)(?:\|)',line[sId]) # here group(0) will return text including '|'s, and group(1) returns only (.+?). this regex is very uniprot specific. in future, if we get reference proteome from non uniprot source, this should be revisited.
                 #print("pid:"+pId.group(1))
                 if pId!=None: #this should always be true here if the subject came from uniprot
+                    #print(line)
                     aaVariationList=findSAPsAndINDELs(line[qSeqCol], line[sSeqCol], line[mSeqCol], pId.group(1), line[qId], line[chromosome], alignInfo)
                     printVariationListtoFile(aaVariationList,SAPFileWriter)
                 else:
@@ -463,12 +472,23 @@ def read(filename, matchCol, evalTheshold, evalCol, gTh, gCol, lCol, qLenCol, sL
             else:
                 count=count+1
 
-filename="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV3.csv"
-SAPFileName="human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
-knownProteinFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsV7.csv"
-knownProteinSAPFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsSAPsV7.csv"
-isoformsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV7.csv"
-isoformsSAPsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV7.csv"
+#filename="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV3.csv"
+#SAPFileName="human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
+#knownProteinFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsV7.csv"
+#knownProteinSAPFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_knownProteinsSAPsV7.csv"
+#isoformsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsV7.csv"
+#isoformsSAPsFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IsoformsSAPsV7.csv"
+
+parser = argparse.ArgumentParser(description='This script read output of UniProteinLocation.py and identify variations')
+parser.add_argument("-b", "--blast", nargs=1, required=True, help="full path of blast csv file", metavar="PATH")
+parser.add_argument("-k", "--known", nargs=1, required=True, help="full path to the known protein file", metavar="PATH")
+parser.add_argument("-s", "--variation", nargs=1, required=True, help="full path to the known proteins with variations file", metavar="PATH")
+parser.add_argument("-v", "--vcf", nargs=1, required=True, help="full path to the vcf file", metavar="PATH")
+parser.add_argument("-i", "--isoform", nargs=1, required=True, help="full path to the isoform file", metavar="PATH")
+parser.add_argument("-j", "--isovar", nargs=1, required=True, help="full path to the isoforms with variation file", metavar="PATH")
+
+args = parser.parse_args()
+print(args.blast[0])
 matchCol=2
 evalTheshold=0.000000000000000000000000000001
 evalCol=6
@@ -488,5 +508,5 @@ sId=4
 qId=0
 chromosome=22
 alignCol=9
-read(filename, matchCol, evalTheshold, evalCol, gTh, gCol, lCol, qLenCol, sLenCol, qSeqCol, sSeqCol, mSeqCol, qSt, qEnd, sSt, sEnd, sId, qId, chromosome, SAPFileName, knownProteinFileName, knownProteinSAPFileName, isoformsFileName, isoformsSAPsFileName)
+read(args.blast[0], matchCol, evalTheshold, evalCol, gTh, gCol, lCol, qLenCol, sLenCol, qSeqCol, sSeqCol, mSeqCol, qSt, qEnd, sSt, sEnd, sId, qId, chromosome, args.vcf[0], args.known[0], args.variation[0], args.isoform[0], args.isovar[0])
 
