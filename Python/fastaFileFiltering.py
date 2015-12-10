@@ -8,6 +8,7 @@ import csv
 parser = argparse.ArgumentParser(description='Fasta file filtering based on a header list given')
 parser.add_argument("-f","--fastaFile", help="fasta file name")
 parser.add_argument("-l","--chosenIds", help="Fasta header list file name, headers should be newline separated")
+parser.add_argument("-o","--outFile", help="Output fasta file name")
 args = parser.parse_args()
 
 #fastahandle = open(sys.argv[1], "rU")
@@ -15,6 +16,7 @@ args = parser.parse_args()
 
 fastahandle = open(args.fastaFile, "rU")
 headerhandle = open(args.chosenIds, "rU")
+outputHandle = open(args.outFile, "w")
 
 overlapping_ids = list(headerhandle)
 overlapping_ids[:] = [line.strip() for line in overlapping_ids]
@@ -32,8 +34,8 @@ for record in records: # SeqIO.parse(handle, "fasta")
     if record.description in overlapping_ids:
         overlapping_ids.remove(record.description)
         count1=count1+1
-        print(">"+record.description)
-        print(record.seq)
+        outputHandle.write(">"+record.description+"\n")
+        outputHandle.write(record.seq+"\n")
         #continue
         #print("found:"+record.description)
 fastahandle.close()
