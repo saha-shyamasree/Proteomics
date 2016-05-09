@@ -25,6 +25,7 @@
 import pandas as pd
 import csv
 import re
+import argparse
 from AminoAcidVariation import AminoAcidVariation
 
 def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
@@ -50,6 +51,7 @@ def checkVariationPeptideCoverage(ORFId, PSMsOfORF, variation):
             proacc_start_stop_pre_post=[s for s in protList if ORFId in s] #this should always have one element.
             if len(proacc_start_stop_pre_post)==1:
                 ##this should always be the case.
+                ## 'start' and 'stop' are both inclusive
                 startEndPrePost=proacc_start_stop_pre_post[0].replace(ORFId,'')
                 print("start end pre post:"+startEndPrePost)
                 pattern=re.compile('_(\d+)_(\d+)_([A-Z]|-)_([A-Z]|-)')
@@ -280,6 +282,16 @@ def groupPeptide(peptideGrouped, ORFId):
             PSMsList=PSMsList.append(query,ignore_index=True)
     return PSMsList
 
+def filterPeptide(peptideObj, pepColumn):
+    peptideObj['Is decoy']=peptideObj['Is decoy'].astype(str)
+    ##removing decoy hits
+    peptideObj=peptideObj[~peptideObj['Is decoy'].str.contains("TRUE",case=False)]
+    ##removing PSMs only mapping to Contaminents
+    peptideObj=peptideObj[~peptideObj[pepColumn].str.contains("^(CONT.*;?)+$")]
+    ##removing PSMs only mapping to Decoy
+    peptideObj=peptideObj[~peptideObj[pepColumn].str.contains("^(XXX.*;?)+$")]
+    return peptideObj
+
 def addVariationInfoToPSM(PSMsOfVariations, variation):
     ## Add ORFId and variation information.
     varInf={'ORFID':variation['QueryID'],'SubjectID':variation['SubjectID'],'variationID':variation['ID'],'variationType':variation['Type'],'Location':variation['QPOS']}
@@ -304,19 +316,21 @@ def addPSMInfoToVariation(variation, PSMsOfVariation):
     ##For time being quality score is 1.
     score=calculateQualityScore(PSMsOfVariation,1)
     ## Number of PSMs
-    PSMCount=len(PSMsOfVariation['PSM_ID'].unique())
-    ## Number of peptide sequences
-    peptideCount=len(PSMsOfVariation['Sequence'].unique())
-    
-    ## Count of peptide sequences that uniquely map to this ORF/Protein
-    unqPeptideCount=len(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique()) ##~ is doing the job of negation, i.e. does not contain. This means the peptide is not shared with other proteins
-    ## Unique peptides
-    print("Unique Peptide:")
-    print(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique())
-    unqPeptides=",".join(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique())
-    if not unqPeptides:
-        unqPeptides="-"
-    PSMInfo={'PSMCount':PSMCount,'PeptideCount':peptideCount,'UniquePeptideCount':unqPeptideCount,'UniquePeptide':unqPeptides,'ConfidenceScore':score}
+    if len(PSMsOfVariation)>0:
+        PSMCount=len(PSMsOfVariation['PSM_ID'].unique())
+        ## Number of peptide sequences
+        peptideCount=len(PSMsOfVariation['Sequence'].unique())
+        ## Count of peptide sequences that uniquely map to this ORF/Protein
+        unqPeptideCount=len(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique()) ##~ is doing the job of negation, i.e. does not contain. This means the peptide is not shared with other proteins
+        ## Unique peptides
+        print("Unique Peptide:")
+        print(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique())
+        unqPeptides=",".join(PSMsOfVariation[(~PSMsOfVariation['proteinacc_start_stop_pre_post_;'].str.contains(';'))]['Sequence'].unique())
+        if not unqPeptides:
+            unqPeptides="-"
+        PSMInfo={'PSMCount':PSMCount,'PeptideCount':peptideCount,'UniquePeptideCount':unqPeptideCount,'UniquePeptide':unqPeptides,'ConfidenceScore':score}
+    else:
+        PSMInfo={'PSMCount':0,'PeptideCount':0,'UniquePeptideCount':0,'UniquePeptide':'-','ConfidenceScore':0}
     writeVar=variation.append(pd.Series(PSMInfo))
     print(writeVar.to_csv(None))
     return writeVar
@@ -324,22 +338,28 @@ def addPSMInfoToVariation(variation, PSMsOfVariation):
 def printValidatedVariations(variation, newVcfFile, headerFlag, fileFlag):
     ##This is another vcf
     if headerFlag==1:
-        newVcfFile.write("#Chr\tPOS within Protein\tID\tREF\tALT\tINFO\n")
+        newVcfFile.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n")
     ##SubjectID','QueryID','Alignment','Type','QPOS'
     if fileFlag==1:
-        newVcfFile.write(str(variation['#Chr'])+"\t"+str(variation['POS within Protein'])+"\t"+str(variation['ID'])+"\t"+variation['REF']+"\t"+variation['ALT']+"\t"+"SubjectId="+variation['SubjectID']+";QueryId="+variation['QueryID'].replace(',','&')+";Alignment=["+variation['Alignment']+"];Type:"+variation['Type']+";QPOS:"+str(variation['QPOS'])+";PeptideCount:"+str(variation['PeptideCount'])+";UniquePeptideCount:"+str(variation['UniquePeptideCount'])+";Peptides:"+variation['UniquePeptide']+";Score:"+str(variation['ConfidenceScore'])+"\n")
+        newVcfFile.write(str(variation['#CHROM'])+"\t"+str(variation['POS'])+"\t"+str(variation['ID'])+"\t"+variation['REF']+"\t"+variation['ALT']+"\t"+str(variation['QUAL'])+"\t"+variation['FILTER']+"\t"+"SubjectId="+variation['SubjectID']+";QueryId="+variation['QueryID'].replace(',','&')+";Alignment=["+variation['Alignment']+"];Type="+variation['Type']+";QPOS="+str(variation['QPOS'])+";PeptideCount="+str(variation['PeptideCount'])+";UniquePeptideCount="+str(variation['UniquePeptideCount'])+";Peptides="+variation['UniquePeptide']+";Score="+str(variation['ConfidenceScore'])+"\n")
     else:
-        newVcfFile.write(str(variation['#Chr'])+"\t"+str(variation['POS within Protein'])+"\t"+str(variation['ID'])+"\t"+variation['REF']+"\t"+variation['ALT']+"\t"+"SubjectId="+variation['SubjectID']+";QueryId="+variation['QueryID'].replace(',','&')+";Alignment=["+variation['Alignment']+"];Type:"+variation['Type']+";QPOS:"+str(variation['QPOS'])+"\n")
+        newVcfFile.write(str(variation['#CHROM'])+"\t"+str(variation['POS'])+"\t"+str(variation['ID'])+"\t"+variation['REF']+"\t"+variation['ALT']+"\t"+str(variation['QUAL'])+"\t"+variation['FILTER']+"\t"+"SubjectId="+variation['SubjectID']+";QueryId="+variation['QueryID'].replace(',','&')+";Alignment=["+variation['Alignment']+"];Type="+variation['Type']+";QPOS="+str(variation['QPOS'])+"\n")
 
 def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
-    ## vcf file fields: Chr, POS within Protein,ID, REF, ALT, INFO(SubjectId=P09417-2;QueryId=Dataset_A_asmbl_41426_ORF20_Frame_3_84-446;Alignment=[QueryLength=121:QueryStart=1:QueryEnd=116:SubjectLength=213:SubjectStart=1:SubjectEnd=116];Type:SSAP;QPOS:116)
+    ## vcf file fields: Chr, POS,ID, REF, ALT, INFO(SubjectId=P09417-2;QueryId=Dataset_A_asmbl_41426_ORF20_Frame_3_84-446;Alignment=[QueryLength=121:QueryStart=1:QueryEnd=116:SubjectLength=213:SubjectStart=1:SubjectEnd=116];Type:SSAP;QPOS:116)
     ## split the INFO column and add them to main data frame
     info=pd.DataFrame(vcf.INFO.str.split(';').tolist(),columns=['SubjectID','QueryID','Alignment','Type','QPOS'])
     vcf=vcf.drop('INFO',1)
     vcf=vcf.join(info)
     vcf.SubjectID=vcf.SubjectID.str.replace('SubjectId=','')
     vcf.QueryID=vcf.QueryID.str.replace('QueryId=','')
-    print(vcf.QueryID[0:5])
+    vcf.QueryID=vcf.QueryID.str.replace('\s+',' ')
+    ### following line is necessary to accomodate the fact that the ORFs ids produced by transdecoder has spaces and the MSGF identification consider the [^\s]+ as the id of the ORF. To match theses ids we remove everything after the first space.
+    queryIDs=pd.DataFrame(vcf.QueryID.str.split(' ').tolist(),columns=['QueryID','GeneID','ORF','GeneID2','QueryID2','Type','Length','Strand','Location'])
+    #vcf=vcf.drop('QueryID',1)
+    #print(vcf.QueryID[0:5])
+    vcf.QueryID=queryIDs['QueryID']
+    #print(vcf.QueryID[0:5])
     vcf.Alignment=vcf.Alignment.str.replace('Alignment=\[','')
     vcf.Alignment=vcf.Alignment.str.replace('\]','')
     vcf.Type=vcf.Type.str.replace('Type:','')
@@ -374,11 +394,17 @@ def findPeptideEvidence(vcf, PSMs, newVcfFile, newPSMFile):
                     print("Variation "+str(variation['ID'])+" has peptide evidence")
                     PSMsOfVariations=addVariationInfoToPSM(PSMsOfVariations, variation)
                     variation=addPSMInfoToVariation(variation, PSMsOfVariations)
+                    variation['QUAL']=PSMsOfVariations['PSM-level q-value'].mean()
+                    variation['FILTER']='PASS'
                     printPSMsOfVariation(PSMsOfVariations, newPSMFile,headerFlag)
                     printValidatedVariations(variation, newVcfFile,headerFlag,1)
                     headerFlag=0
                 else:
                     print(str(variation['ID'])+" does not have peptide evidence")
+                    ##still write this variation in the vcffile.
+                    variation=addPSMInfoToVariation(variation, PSMsOfVariations)
+                    printValidatedVariations(variation, newVcfFile,headerFlag,1)
+                    headerFlag=0
         else:
             print(ORFId+" was not identified")
         
@@ -397,7 +423,10 @@ def pepThresholding(prots,pepTh):
 
 def main(PSMFileName, vcfFileName, newVcfFileName, newPSMFileName):
     ##read peptide identification file
-    PSMs=readFile(PSMFileName, ',')
+    peptideObj=readFile(PSMFileName, ',')
+    ## removes decoy and contaminant hits.
+    pepColumn='proteinacc_start_stop_pre_post_;'
+    PSMs=filterPeptide(peptideObj, pepColumn)
     ##read vcf file
     vcf=readFile(vcfFileName,'\t')
     ##for each entry in the vcf try find peptides that overlaps the vcf entry location. For deletion event, it might
@@ -416,7 +445,7 @@ def subsettingIdentifiedORFVariation(ProtFileName, vcfFileName, subVcfFileName,p
     ##read vcf file
     vcf=readFile(vcfFileName,'\t')
     
-    ## vcf file fields: Chr, POS within Protein,ID, REF, ALT, INFO(SubjectId=P09417-2;QueryId=Dataset_A_asmbl_41426_ORF20_Frame_3_84-446;Alignment=[QueryLength=121:QueryStart=1:QueryEnd=116:SubjectLength=213:SubjectStart=1:SubjectEnd=116];Type:SSAP;QPOS:116)
+    ## vcf file fields: Chr, POS,ID, REF, ALT, INFO(SubjectId=P09417-2;QueryId=Dataset_A_asmbl_41426_ORF20_Frame_3_84-446;Alignment=[QueryLength=121:QueryStart=1:QueryEnd=116:SubjectLength=213:SubjectStart=1:SubjectEnd=116];Type:SSAP;QPOS:116)
     ## split the INFO column and add them to main data frame
     info=pd.DataFrame(vcf.INFO.str.split(';').tolist(),columns=['SubjectID','QueryID','Alignment','Type','QPOS'])
     vcf=vcf.drop('INFO',1)
@@ -456,6 +485,19 @@ def subsettingIdentifiedORFVariation(ProtFileName, vcfFileName, subVcfFileName,p
             else:
                 print(ORFId+" was not identified")
         
+
+parser = argparse.ArgumentParser(description='This script read output of UniProteinLocation.py and identify variations')
+parser.add_argument("-p", "--psm", nargs=1, required=True, help="full path of the PSM csv file", metavar="PATH")
+#parser.add_argument("-r", "--protein", nargs=1, required=True, help="full path to the protein csv file", metavar="PATH")
+parser.add_argument("-s", "--psmout", nargs=1, required=True, help="full path to the PSMs with variations evidence file", metavar="PATH")
+parser.add_argument("-v", "--vcf", nargs=1, required=True, help="full path to the vcf file", metavar="PATH")
+parser.add_argument("-o", "--vcfout", nargs=1, required=True, help="full path to the peptide evidence vcf file", metavar="PATH")
+
+args = parser.parse_args()
+print(args.vcf[0])
+#v=readFile(args.vcf[0],'\t')
+#print(v.columns.values)
+'''
 PSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+grouping.csv"
 ProtFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+grouping+prt.csv"
 #vcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7.vcf"
@@ -465,14 +507,18 @@ ProtFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assembly
 newPSMFileName="D:/data/Results/Human-Adeno/Identification/PASA/sORF/pasa_assemblyV1+fdr+th+groupingVariationEvidencePep2.csv"
 newVcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_with_Location_VariationV7PeptideEvidencePep2.vcf"
 subVcfFileName="D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs_IdentifiedORFsVariationPep2.vcf"
-'''
+#######
 PSMFileName="pepTest.csv"
 vcfFileName="vcfTest.vcf"
 
 ## New Files
 newPSMFileName="pepVariationEvidence.csv"
 newVcfFileName="vcfPeptideEvidence.vcf"
+#############
 '''
 pepCount=1
 #subsettingIdentifiedORFVariation(ProtFileName, vcfFileName, subVcfFileName, pepCount)
-main(PSMFileName, subVcfFileName, newVcfFileName, newPSMFileName)
+#main(PSMFileName, subVcfFileName, newVcfFileName, newPSMFileName)
+#if IdentifyProteinIsoformSAP is run on identified ORFs, then we neither need to filter the vcf file nor the psm file.
+
+main(args.psm[0], args.vcf[0], args.vcfout[0], args.psmout[0])

@@ -11,7 +11,7 @@ import argparse
 #findProtein('P62258',protList)
 #Consider chromosome X and Y.
 def findProtein(proteinId, proteinList):
-    chromosome=[element[1] for element in proteinList if element[0]==proteinId]## should always have one element in this list.
+    chromosome=[element[1] for element in proteinList if element[0]==proteinId]## should always have one element in this list. unless this proteinId does not exist in the proteinList, which is possible.
     if len(chromosome)==0:
         return 0;
     else:
@@ -101,3 +101,4 @@ args = parser.parse_args()
 idx=4
 read(args.blast[0], args.uniprot[0], args.output[0],idx)
 #read('D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs.csv','D:/data/Data/uniprot-Homo+sapiens960613_04_2015.xls','D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV3.csv')
+#D:\Code\Proteomics\Python\IsoformsSAP>python UniProteinLocation.py -b D:\data\Bristol\HumanAdeno\PASATransdecoder\pasa_transdecoder_nonstar_identified.csv -u D:/data/Data/uniprot-Homo+sapiens960613_04_2015.xls -o D:\data\Bristol\HumanAdeno\PASATransdecoder\pasa_transdecoder_nonstar_identified_Location.csv
