@@ -95,6 +95,36 @@ proteinGrpSameSet <-function(proteinGrp)
     as.matrix(proteinGrp[grep('sequence same-set protein',proteinGrp[,'group.membership']),])
 }
 
+pepMatch<-function(prt,peptides)
+{
+	prt1=gsub(";",",",prt)
+	idx=grep(prt,peptides[,'proteinacc_start_stop_pre_post_.'],value=FALSE,fixed=TRUE)
+	idx
+}
+#peptideCount<-function(peptides,prtList)
+#{
+#	print(dim(peptides))
+#	print(dim(prtList))
+#	idxs=apply(prtList,1,pepMatch,peptides)
+#	peptides[unique(unlist(idxs)),'Sequence']
+#}
+
+peptideCount<-function(peptides, prtList)
+{
+	prtStr=paste(prtList,collapse="|")
+	#print(prtStr)
+	#print(colnames(peptides))
+	idx=c()
+	for(i in 1:length(prtList))
+	{
+		prt=gsub(";",",",prtList[i])
+		idx=c(idx,grep(prt,peptides[,'proteinacc_start_stop_pre_post_.'],value=FALSE,fixed=TRUE))
+		idx=unique(idx)	
+	}
+	#psms=grep(prtStr, peptides[,'proteinacc_start_stop_pre_post_.'],value=FALSE)
+	psms=unique(idx)
+	peptides[psms,'Sequence']	
+}
 proteinGrpSub <- function(proteinGrp)
 {
     as.matrix(proteinGrp[grep('sequence.*',proteinGrp[,'group.membership']),])

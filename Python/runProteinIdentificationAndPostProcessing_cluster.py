@@ -22,7 +22,7 @@ parser.add_argument("--mzident_path", default=["/data/home/btw796/Prog/MzidLib-1
 #parser.add_option("--min3", help="the minimum length of 3' uORFs, only works when -uorf3output is set", metavar="Integer")
 
 args = parser.parse_args()
-print(args)
+#print(args)
 
 contaminants="/data/SBCS-BessantLab/shyama/Data/Contaminants/crap.fasta"
 
@@ -37,13 +37,23 @@ os.system("python3.4 merge_fasta_file.py "+args.database[0]+" "+contaminants+" "
 
 #directoryMSG=sp.check_output(["cd",args.msgf_path], shell=True, stderr=sp.STDOUT)
 os.chdir(args.msgf_path[0])
-print("current dir:")
-print(os.getcwd())
+#print("current dir:")
+#print(os.getcwd())
+
+###Printing this to the out file allows to run the out file as a shell script.
+print("#!/bin/sh")
+print("#$ -cwd              # Set the working directory for the job to the current directory")
+print("#$ -V")
+print("#$ -l h_rt=120:0:0    # Request 240 hour runtime")
+print("#$ -l h_vmem=32G      # Request 4GB RAM")
+
+print("cd "+args.msgf_path[0])
 command=" ".join(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar","-s",args.input[0],"-d",args.database[0]+".cont.fasta","-o",args.output[0],"-mod",args.modification[0],"-t",args.tolerance[0],"-m",args.m_msgf[0],"-tda",args.tda[0],"-inst",args.inst[0],"-minLength",args.minLength[0]])
 print(command)
 #os.system(command)
-os.chdir(args.mzident_path[0])
-print(os.getcwd())
+#print(os.chdir(args.mzident_path[0]))
+#print(os.getcwd())
+print("cd "+args.mzident_path[0])
 mzFDR=" ".join(["java","-Xms1024m","-jar","mzidentml-lib.jar","FalseDiscoveryRate",args.database[0]+".mzid",args.database[0]+"+fdr.mzid","-decoyRegex","XXX_","-decoyValue","1","-cvTerm","\"MS:1002053\"","-betterScoresAreLower","true"])
 print(mzFDR)
 

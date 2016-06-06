@@ -8,8 +8,8 @@ mysqlDir=/data/home/btw796/Prog/MySQL
 cd $mysqlDir
 
 #./scripts/mysql_install_db --user=mysql --datadir=/data/SBCS-BessantLab/shyama/Data/MySQL/data3/
-./bin/mysqld_safe --defaults-file=/data/home/btw796/Prog/MySQL/my-new.cnf &
-
+#./bin/mysqld_safe --defaults-file=/data/home/btw796/Prog/MySQL/my-new.cnf &
+./bin/mysqld_safe --defaults-file=/data/home/btw796/Prog/MySQL/my-new2.cnf &
 run=1
 while [ $run == 1 ]
 do

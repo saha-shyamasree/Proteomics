@@ -17,21 +17,27 @@ do
 	#if [ "$sample" = 'G42' ] || [ "$sample" = 'G54' ] || [ "$sample" = 'G82' ] || [ "$sample" = 'G124' ]; then
 	#if [ "$sample" = 'G69' ]; then #step 25
 	#if [ "$sample" = 'G58' ] || [ "$sample" = 'G72' ] || [ "$sample" = 'G85' ]; then #step 24
-	if [ "$sample" = 'G93' ] || [ "$sample" = 'G94' ]; then #step 23
-	#if [ "$sample" = 'G30' ]; then
+	#if [ "$sample" = 'G93' ] || [ "$sample" = 'G94' ]; then #step 23
+	#if [ "$sample" = 'G42' ] || [ "$sample" = 'G85' ] || [ "$sample" = 'G124' ]; then #ALT_APLICE
+	#if [ "$sample" = 'G72' ] || [ "$sample" = 'G93' ]; then 
+	#if [ "$sample" = 'G81' ] || [ "$sample" = 'G88' ]; then
+	#if [ "$sample" = 'G57' ] || [ "$sample" = 'G67' ] || [ "$sample" = 'G77' ] || [ "$sample" = 'G92' ]; then
+	#if [ "$sample" = 'G43' ]; then
+	#if [ "$sample" = 'G57' ] || [ "$sample" = 'G67' ] || [ "$sample" = 'G81' ];then
+	if [ "$sample" = 'G67' ];then
 		echo $sample
 	
-		#if [ ! -d "$DIR""$sample" ]; then
-        	#	mkdir $DIR$sample
-		#fi
+		if [ ! -d "$DIR""$sample" ]; then
+        		mkdir $DIR$sample
+		fi
 		#cp $Trinity$sample'.Trinity.fasta' $DIR$sample
-		#cp ~/Prog/PASApipeline-master/human_adeno_data/alignAssembly.config $DIR$sample
+		#cp /data/SBCS-BessantLab/shyama/Data/alignAssembly.config $DIR$sample
 		#sed -i -- s/human_adeno_mydb_pasa/$sample/ $DIR$sample/alignAssembly.config
 		cd $DIR$sample
 		#echo "seqclean $DIR$sample/$sample.Trinity.fasta" | qsub -cwd -V -l h_vmem=8G -l h_rt=72:0:0
-		#echo "/data/home/btw796/Prog/PASApipeline-master/scripts/Launch_PASA_pipeline.pl -c alignAssembly.config -C -R -g /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/hg38.fa -t $sample.Trinity.fasta.clean -T -u $sample.Trinity.fasta --ALIGNERS blat,gmap --MAX_INTRON_LENGTH 300000 --TRANSDECODER --stringent_alignment_overlap 30.0 --gene_overlap 50.0 -L --annots_gff3 /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/Homo_sapiens.GRCh38.78_Protein_Coding.gff3 --CPU 8" | qsub -cwd -V -l h_vmem=60G -l h_rt=140:0:0
-		echo "/data/home/btw796/Prog/PASApipeline-master/scripts/Launch_PASA_pipeline.pl -c alignAssembly.config -s 23 -R -g /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/hg38.fa -t $sample.Trinity.fasta.clean -T -u $sample.Trinity.fasta --ALIGNERS blat,gmap --ALT_SPLICE --MAX_INTRON_LENGTH 300000 --TRANSDECODER --stringent_alignment_overlap 30.0 --gene_overlap 50.0 -L --annots_gff3 /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/Homo_sapiens.GRCh38.78_Protein_Coding.gff3 --CPU 8" | qsub -cwd -V -l h_vmem=100G -l h_rt=100:0:0
-		#echo "/data/home/btw796/Prog/PASApipeline-master/scripts/Launch_PASA_pipeline.pl -c alignAssembly.config -g /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/hg38.fa -t $sample.Trinity.fasta.clean -T -u $sample.Trinity.fasta --ALT_SPLICE --TRANSDECODER --stringent_alignment_overlap 30.0 --gene_overlap 50.0 -L --annots_gff3 /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/Homo_sapiens.GRCh38.78_Protein_Coding.gff3 --CPU 4" | qsub -cwd -V -l h_vmem=16G -l h_rt=48:0:0
+		#echo "/data/home/btw796/Prog/PASApipeline-master/scripts/Launch_PASA_pipeline.pl -c alignAssembly.config -C -R -g /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/hg38.fa -t $sample.Trinity.fasta.clean -T -u $sample.Trinity.fasta --ALIGNERS blat,gmap --MAX_INTRON_LENGTH 300000 --TRANSDECODER --stringent_alignment_overlap 30.0 --gene_overlap 50.0 -L --annots_gff3 /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/Homo_sapiens.GRCh38.78_Protein_Coding.gff3 --CPU 16" | qsub -cwd -V -l h_vmem=100G -l h_rt=140:0:0
+		#echo "/data/home/btw796/Prog/PASApipeline-master/scripts/Launch_PASA_pipeline.pl -c alignAssembly.config -s 26 -R -g /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/hg38.fa -t $sample.Trinity.fasta.clean -T -u $sample.Trinity.fasta --ALIGNERS blat,gmap --ALT_SPLICE --MAX_INTRON_LENGTH 300000 --TRANSDECODER --stringent_alignment_overlap 30.0 --gene_overlap 50.0 -L --annots_gff3 /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/Homo_sapiens.GRCh38.78_Protein_Coding.gff3 --CPU 16" | qsub -cwd -V -l h_vmem=100G -l h_rt=100:0:0
+		echo "/data/home/btw796/Prog/PASApipeline-master/scripts/Launch_PASA_pipeline.pl -c alignAssembly.config -g /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/hg38.fa -t $sample.Trinity.fasta.clean -T -u $sample.Trinity.fasta --ALT_SPLICE --stringent_alignment_overlap 30.0 --gene_overlap 50.0 -L --annots_gff3 /data/SBCS-BessantLab/shyama/Data/Bristol/Human/adenovirus/PASA/human_adeno_data/Homo_sapiens.GRCh38.78_Protein_Coding.gff3 --CPU 4" | qsub -cwd -V -l h_vmem=36G -l h_rt=72:0:0
 	fi
     fi
 done

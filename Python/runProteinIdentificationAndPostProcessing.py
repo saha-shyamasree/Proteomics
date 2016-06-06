@@ -1,49 +1,72 @@
 ## This python code run MSGF+ and mzidenML-lib i.e. protein identification and post-process the result
 
 import argparse
-import subprocess as sp
+from subprocess import Popen, PIPE
+#import subprocess as sp
+import os
 
 parser = argparse.ArgumentParser(description='This python code run MSGF+ and mzidenML-lib i.e. protein identification and post-process the result')
 parser.add_argument("-i", "--input", nargs=1, required=True, help="full path of mgf file", metavar="PATH")
 parser.add_argument("-o", "--output", nargs=1, required=True, help="full path of of output file", metavar="PATH")
 parser.add_argument("-d", "--database", nargs=1, required=True, help="full path to the database file", metavar="PATH")
 parser.add_argument("-m","--modification", nargs=1, required=True, help="full path to the modification file", metavar="PATH")
-parser.add_argument("-t", "--tolerance", default="10ppm", help="mass tolerance")
+parser.add_argument("-t", "--tolerance", default=["10ppm"], help="mass tolerance")
 #parser.add_option("--tda", help="whether to create decoy database", metavar="Integer")
-parser.add_argument("--m_msgf", default=1, help="", metavar="Integer")
-parser.add_argument("--inst", default=1,help="")
-parser.add_argument("--minLength", default=8, help="minimum peptide length", metavar="LENGTH")
-parser.add_argument("--msgf_path", default="/data/home/btw796/Prog/MSGF+/",help="msgf+ jar file location", metavar="PATH")
-parser.add_argument("--mzident_path", default="/data/home/btw796/Prog/MzidLib-1.6/",help="mzidentml-lib jarfile location", metavar="PATH")
+parser.add_argument("--m_msgf", default=['1'], help="", metavar="Integer")
+parser.add_argument("--inst", default=['1'],help="Instrument")
+parser.add_argument("--minLength", default=['8'], help="minimum peptide length", metavar="LENGTH")
+parser.add_argument("--tda", default=['1'],help="Decoy database search tda 0/1(default)")
+
+parser.add_argument("--msgf_path", default=["/data/home/btw796/Prog/MSGF+/"],help="msgf+ jar file location", metavar="PATH")
+parser.add_argument("--mzident_path", default=["/data/home/btw796/Prog/MzidLib-1.6/"],help="mzidentml-lib jarfile location", metavar="PATH")
 #parser.add_option("--min3", help="the minimum length of 3' uORFs, only works when -uorf3output is set", metavar="Integer")
 
 args = parser.parse_args()
 print(args)
 
-'''
+contaminants="/data/SBCS-BessantLab/shyama/Data/Contaminants/crap.fasta"
 
-    name or flags - Either a name or a list of option strings, e.g. foo or -f, --foo.
-    action - The basic type of action to be taken when this argument is encountered at the command line.
-    nargs - The number of command-line arguments that should be consumed.
-    const - A constant value required by some action and nargs selections.
-    default - The value produced if the argument is absent from the command line.
-    type - The type to which the command-line argument should be converted.
-    choices - A container of the allowable values for the argument.
-    required - Whether or not the command-line option may be omitted (optionals only).
-    help - A brief description of what the argument does.
-    metavar - A name for the argument in usage messages.
-    dest - The name of the attribute to be added to the object returned by parse_args().
+#p=Popen(["python3.4","merge_fasta_file.py", args.database[0], contaminants,  args.database[0]+".cont.fasta"],stdout=PIPE)
+#p=sp.call(["python3.4","merge_fasta_file.py", args.database[0], contaminants,  args.database[0]+".cont.fasta"])
+#p.wait()
+#outMsg = p.communicate()[0]
+#print(p.returncode)
 
-'''
+os.system("python3.4 merge_fasta_file.py "+args.database[0]+" "+contaminants+" "+args.database[0]+".cont.fasta")
 
-#subprocess.call(["perl /data/home/btw796/Code/Proteomics/Perl/orfall.pl", "-h"])
-directoryMSG=sp.check_output(["cd",args.msgf_path], shell=True, stderr=sp.STDOUT)
-print(""+ str(directoryMSG))
+
+#directoryMSG=sp.check_output(["cd",args.msgf_path], shell=True, stderr=sp.STDOUT)
+os.chdir(args.msgf_path[0])
+print("current dir:")
 print(os.getcwd())
-msgfMSG=sp.check_output(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar"])#,"D:\Code\Proteomics\Perl\orfall.pl",args.input,args.output])
-print(msgfMSG)
+command=" ".join(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar","-s",args.input[0],"-d",args.database[0]+".cont.fasta","-o",args.output[0],"-mod",args.modification[0],"-t",args.tolerance[0],"-m",args.m_msgf[0],"-tda",args.tda[0],"-inst",args.inst[0],"-minLength",args.minLength[0]])
+print(command)
+os.system(command)
+#msgf=Popen(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar","-s",args.input[0],"-d",args.database[0]+".cont.fasta","-o",args.output[0],"-mod",args.modification[0],"-t",args.tolerance[0],"-m",args.m_msgf[0],"-tda",args.tda[0],"-inst",args.inst[0],"-minLength",args.minLength[0]],stdout=PIPE)
+#msgf.wait()
+#print(msgf.communicate()[0])
+#msgf=sp.call(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar","-s",args.input[0],"-d",args.database[0]+".cont.fasta","-o",args.output[0],"-mod",args.modification[0],"-t",args.tolerance[0],"-m",args.m_msgf[0],"-tda",args.tda[0],"-inst",args.inst[0],"-minLength",args.minLength[0]])
+#outMsg=msgfMSG.communicate()[0]
+#print(msgMSG.returncode)
 
+'''
+os.chdir(args.mzident_path[0])
 
+mzFDR=Popen(["java","-Xms10024m","-jar","mzidentml-lib.jar","FalseDiscoveryRate",args.database[0]+".mzid",args.database[0]+"+fdr.mzid","-decoyRegex","XXX_","-decoyValue","1","-cvTerm","\"MS:1002053\"","-betterScoresAreLower","true"])
+mzFDR.wait()
+
+mzTh=Popen(["java","-Xmx8024m","-jar","mzidentml-lib.jar","Threshold",args.database[0]+"+fdr.mzid",args.database[0]+"+fdr+th.mzid","-isPSMThreshold","true","-cvAccessionForScoreThreshold","MS:1002355","-threshValue","0.01","-betterScoresAreLower","true","-deleteUnderThreshold","true"])
+mzTh.wait()
+
+mzGrp=Popen(["java","-Xmx4024m","-jar","mzidentml-lib.jar","ProteoGrouper",args.database[0]+"+fdr+th.mzid",args.database[0]+"+fdr+th+grouping.mzid","-cvAccForSIIScore","MS:1002355","-logTransScore","true","-requireSIIsToPassThreshold","true","-verboseOutput","false"])
+mzGrp.wait()
+
+mzPep=Popen(["java","-Xmx4024m","-jar","mzidentml-lib.jar","Mzid2Csv",args.database[0]+"+fdr+th+grouping.mzid",args.database[0]+"+fdr+th+grouping.csv","-exportType","exportPSMs","-compress","false"])
+mzPep.wait()
+
+mzPrt=Popen(["java","-Xmx4024m","-jar","mzidentml-lib.jar","Mzid2Csv",args.database[0]+"+fdr+th+grouping.mzid",args.database[0]+"+fdr+th+grouping+prt.csv","-exportType","exportProteinsOnly","-compress","false"])
+mzPrt.wait()
+'''
 '''
 java -Xmx12000M -jar MSGFPlus.jar -s I:\Human-Hendra\Data\mgf\Slice.mgf -d I:\Human-Hendra\Trinity_HeV293-ORF_concatenated_target_decoy.fasta -o I:\Human-Hendra\SearchEngine\MSGF+\trinity.mzid -mod C:\Data\HUMAN\mzML\modifications.txt -t 10ppm -m 1 -tda 0 -inst 1 -minLength 8
 java -Xms10024m -jar mzidentml-lib.jar FalseDiscoveryRate I:\Human-Hendra\SearchEngine\MSGF+\trinity.mzid I:\Human-Hendra\SearchEngine\MSGF+\trinity+fdr.mzid -decoyRegex _REVERSED -decoyValue 1 -cvTerm "MS:1002053" -betterScoresAreLower true

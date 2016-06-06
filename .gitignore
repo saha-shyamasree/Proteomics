@@ -41,3 +41,16 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Output Files
+
+*.txt
+STDIN.*
+*.sh.o*
+*.sh.e*
+*.py.o*
+*.py.e*
+*.sh~
+*.py~
+.RData
+.Rhistory
