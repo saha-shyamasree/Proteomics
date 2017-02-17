@@ -32,6 +32,7 @@ contaminants="/data/SBCS-BessantLab/shyama/Data/Contaminants/crap.fasta"
 #outMsg = p.communicate()[0]
 #print(p.returncode)
 
+##Temporariliy commented out
 os.system("python3.4 merge_fasta_file.py "+args.database[0]+" "+contaminants+" "+args.database[0]+".cont.fasta")
 
 
@@ -49,29 +50,31 @@ print("#$ -l h_vmem=32G      # Request 4GB RAM")
 
 print("cd "+args.msgf_path[0])
 command=" ".join(["java", "-Xmx12000M", "-jar", "MSGFPlus.jar","-s",args.input[0],"-d",args.database[0]+".cont.fasta","-o",args.output[0],"-mod",args.modification[0],"-t",args.tolerance[0],"-m",args.m_msgf[0],"-tda",args.tda[0],"-inst",args.inst[0],"-minLength",args.minLength[0]])
+#print("#"+command)
 print(command)
+outBase=os.path.splitext(args.output[0])[0]
 #os.system(command)
 #print(os.chdir(args.mzident_path[0]))
 #print(os.getcwd())
 print("cd "+args.mzident_path[0])
-mzFDR=" ".join(["java","-Xms1024m","-jar","mzidentml-lib.jar","FalseDiscoveryRate",args.database[0]+".mzid",args.database[0]+"+fdr.mzid","-decoyRegex","XXX_","-decoyValue","1","-cvTerm","\"MS:1002053\"","-betterScoresAreLower","true"])
+mzFDR=" ".join(["java","-Xmx12000M","-jar","mzidentml-lib.jar","FalseDiscoveryRate",args.output[0],outBase+"+fdr.mzid","-decoyRegex","XXX_","-decoyValue","1","-cvTerm","\"MS:1002053\"","-betterScoresAreLower","true"])
 print(mzFDR)
 
 #os.system(mzFDR)
 
-mzTh=" ".join(["java","-Xmx8024m","-jar","mzidentml-lib.jar","Threshold",args.database[0]+"+fdr.mzid",args.database[0]+"+fdr+th.mzid","-isPSMThreshold","true","-cvAccessionForScoreThreshold","MS:1002355","-threshValue","0.01","-betterScoresAreLower","true","-deleteUnderThreshold","true"])
+mzTh=" ".join(["java","-Xmx8024m","-jar","mzidentml-lib.jar","Threshold",outBase+"+fdr.mzid",outBase+"+fdr+th.mzid","-isPSMThreshold","true","-cvAccessionForScoreThreshold","MS:1002355","-threshValue","0.01","-betterScoresAreLower","true","-deleteUnderThreshold","true"])
 print(mzTh)
 #os.system(mzTh)
 
-mzGrp=" ".join(["java","-Xmx4024m","-jar","mzidentml-lib.jar","ProteoGrouper",args.database[0]+"+fdr+th.mzid",args.database[0]+"+fdr+th+grouping.mzid","-cvAccForSIIScore","MS:1002355","-logTransScore","true","-requireSIIsToPassThreshold","true","-verboseOutput","false"])
+mzGrp=" ".join(["java","-Xmx4024m","-jar","mzidentml-lib.jar","ProteoGrouper",outBase+"+fdr+th.mzid",outBase+"+fdr+th+grouping.mzid","-cvAccForSIIScore","MS:1002355","-logTransScore","true","-requireSIIsToPassThreshold","true","-verboseOutput","false"])
 print(mzGrp)
 #os.system(mzGrp)
 
-mzPep=" ".join(["java","-Xmx4024m","-jar","mzidentml-lib.jar","Mzid2Csv",args.database[0]+"+fdr+th+grouping.mzid",args.database[0]+"+fdr+th+grouping.csv","-exportType","exportPSMs","-compress","false"])
+mzPep=" ".join(["java","-Xmx4024m","-jar","mzidentml-lib.jar","Mzid2Csv",outBase+"+fdr+th+grouping.mzid",outBase+"+fdr+th+grouping.csv","-exportType","exportPSMs","-compress","false"])
 print(mzPep)
 #os.system(mzPep)
 
-mzPrt=" ".join(["java","-Xmx4024m","-jar","mzidentml-lib.jar","Mzid2Csv",args.database[0]+"+fdr+th+grouping.mzid",args.database[0]+"+fdr+th+grouping+prt.csv","-exportType","exportProteinsOnly","-compress","false"])
+mzPrt=" ".join(["java","-Xmx4024m","-jar","mzidentml-lib.jar","Mzid2Csv",outBase+"+fdr+th+grouping.mzid",outBase+"+fdr+th+grouping+prt.csv","-exportType","exportProteinsOnly","-compress","false"])
 print(mzPrt)
 #os.system(mzPrt)
 
