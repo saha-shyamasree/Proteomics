@@ -6,6 +6,7 @@
 ############################################################################################################################################
 ## 76, 81, 88
 ## Get the genome from Ensembl
+<<COMMENT
 wget ftp://ftp.ensembl.org/pub/release-80/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz /data/SBCS-BessantLab/shyama/Data/Oliver/fasta/Homo_sapiens.GRCh38.dna.toplevel.fa.gz
 ## Build bowtie2 index from the refernec genome
 echo "bowtie2-build /data/SBCS-BessantLab/shyama/Data/Oliver/fasta/Homo_sapiens.GRCh38.dna.toplevel.fa /data/SBCS-BessantLab/shyama/Data/Oliver/fasta/Homo_sapiens.GRCh38.dna.toplevel" | qsub -cwd -V -l h_vmem=20G -l h_rt=48:0:0
@@ -80,4 +81,21 @@ do
         sample=$(basename $file | sed -e "s/_1.fastq.gz//g") 
         echo "rm -R /data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/$sample" | qsub -cwd -V -l h_vmem=2G -l h_rt=72:0:0
     fi
+done
+COMMENT
+
+DIR='/data/SBCS-BessantLab/shyama/Data/Oliver/PITDB/PSMs-Peptides-ORFs/'
+Trinity='/data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/'
+
+code='/data/home/btw796/Code2/Proteomics/Python/standardSearchResultProcessing.py'
+#cd code
+for file in "$Trinity"*.Trinity.fasta
+do
+    sample=$(basename $file | sed -e "s/.Trinity.fasta//g")
+    cp /data/SBCS-BessantLab/shyama/Data/Oliver/Identification/$sample/$sample.standard+fdr+th+grouping+prt.csv $DIR/$sample.standard+fdr+th+grouping+prt.csv
+    cp /data/SBCS-BessantLab/shyama/Data/Oliver/Identification/$sample/$sample.standard+fdr+th+grouping.csv $DIR/$sample.standard+fdr+th+grouping.csv
+    #mv $DIR$sample+fdr+th+grouping_filtered.csv $DIR$sample+fdr+th+grouping_filtered_bug.csv
+	#python $code --protein $DIR$sample+fdr+th+grouping+prt_filtered.csv --peptide $DIR/$sample+fdr+th+grouping_filtered_bug.csv --protOut $DIR$sample+fdr+th+grouping+prt_filtered.csv --pepOut $DIR$sample+fdr+th+grouping_filtered.csv
+    python $code --protein $DIR$sample.standard+fdr+th+grouping+prt.csv --peptide $DIR/$sample.standard+fdr+th+grouping.csv --protOut $DIR$sample.standard+fdr+th+grouping+prt_filtered.csv --pepOut $DIR$sample.standard+fdr+th+grouping_filtered.csv
+	
 done

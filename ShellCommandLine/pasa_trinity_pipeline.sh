@@ -5,7 +5,7 @@
 #$ -l h_vmem=12G      # Request 32GB RAM
 
 #source ~/.profile
-
+<<COMMENT
 rna=$1
 Trinity=$2
 pasa=$1 #'/data/SBCS-BessantLab/shyama/Data/Oliver/PASA/'
@@ -63,7 +63,26 @@ do
 	#fi
     fi
 done
+COMMENT
 
+## remove the trinity directories
+dir='/data/SBCS-BessantLab/shyama/Data/Oliver/RNA/'
+trinity='/data/SBCS-BessantLab/shyama/Data/Oliver/Trinity/'
+for file in "$dir"*_1.fastq.gz
+do
+    if [ -f $file ]; then
+        #if [[ $file != *"253"* ]] && [[ $file != *"254"* ]] && [[ $file != *"255"* ]]
+        #then
+        sample=$(basename $file | sed -e "s/_1.fastq.gz//g")
+        #echo $sample
+        if [ -d $trinity$sample ]; then
+            echo "rm -R $trinity$sample" | qsub -cwd -V -l h_vmem=2G -l h_rt=72:0:0
+            echo $sample
+        else
+            echo $file
+        fi
+    fi
+done
 ## make a new directory with sample name
 #if [ ! -d "$DIR""$sample" ]; then
 #	mkdir $DIR$sample
