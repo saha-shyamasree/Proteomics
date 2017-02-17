@@ -6,11 +6,12 @@
 import os
 import csv
 import re
+import argparse
 
 #findProtein('P62258',protList)
 #Consider chromosome X and Y.
 def findProtein(proteinId, proteinList):
-    chromosome=[element[1] for element in proteinList if element[0]==proteinId]## should always have one element in this list.
+    chromosome=[element[1] for element in proteinList if element[0]==proteinId]## should always have one element in this list. unless this proteinId does not exist in the proteinList, which is possible.
     if len(chromosome)==0:
         return 0;
     else:
@@ -59,7 +60,7 @@ def readUniFile(filename):
     return proteins;
 
 #read('D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs.csv','D:/data/Data/uniprot-Homo+sapiens960613_04_2015.xls','D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_with_Location.csv')
-def read(blastFileName, uniProteinFileName, newBlastFileName):
+def read(blastFileName, uniProteinFileName, newBlastFileName, index):
     subjectProtCol=4;
     with open(blastFileName, 'r', newline='') as blastFile, open(newBlastFileName,'w',newline='') as newBlastFile:
         reader = csv.reader(blastFile, delimiter=',') #,quoting=csv.QUOTE_NONNUMERIC
@@ -70,7 +71,7 @@ def read(blastFileName, uniProteinFileName, newBlastFileName):
         for line in reader:
             
             if count>0:
-                pId=re.search('(?:\|)(.+?)(?:\|)',line[4]) # here group(0) will return text including '|'s, and group(1) returns only (.+?). this regex is very uniprot specific. in future, if we get reference proteome from non uniprot source, this should be revisited.
+                pId=re.search('(?:\|)(.+?)(?:\|)',line[index]) # here group(0) will return text including '|'s, and group(1) returns only (.+?). this regex is very uniprot specific. in future, if we get reference proteome from non uniprot source, this should be revisited.
                 if pId!=None:
                     #print(line)
                     #print(pId.groups())
@@ -92,4 +93,13 @@ def read(blastFileName, uniProteinFileName, newBlastFileName):
                 count=count+1
         #fileWriter.close()
 
-read('D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs.csv','D:/data/Data/uniprot-Homo+sapiens960613_04_2015.xls','D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV3.csv')
+parser = argparse.ArgumentParser(description='This script read output of contigStat.py and uniprot protein location file and merge the information')
+parser.add_argument("-b", "--blast", nargs=1, required=True, help="full path of blast csv file", metavar="PATH")
+parser.add_argument("-u", "--uniprot", nargs=1, required=True, help="full path of uniprot file", metavar="PATH")
+parser.add_argument("-o", "--output", nargs=1, required=True, help="full path of output file", metavar="PATH")
+args = parser.parse_args()
+print(args)
+idx=4
+read(args.blast[0], args.uniprot[0], args.output[0],idx)
+#read('D:/data/blast/blastCSV/PASA/Human-Adeno/human_adeno_mydb_pasa.assemblies_ORFs.csv','D:/data/Data/uniprot-Homo+sapiens960613_04_2015.xls','D:/data/blast/blastCSV/human_adeno_mydb_pasa.assemblies_ORFs_with_LocationV3.csv')
+#D:\Code\Proteomics\Python\IsoformsSAP>python UniProteinLocation.py -b D:\data\Bristol\HumanAdeno\PASATransdecoder\pasa_transdecoder_nonstar_identified.csv -u D:/data/Data/uniprot-Homo+sapiens960613_04_2015.xls -o D:\data\Bristol\HumanAdeno\PASATransdecoder\pasa_transdecoder_nonstar_identified_Location.csv

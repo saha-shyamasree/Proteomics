@@ -45,24 +45,7 @@ class AminoAcidVariation:
             prefix=int(self.alingmentInfo['subjectStart'])-1;
         if int(self.alingmentInfo['queryStart'])!=1:
             qPrefix=int(self.alingmentInfo['queryStart'])-1;
-            #print(qPrefix)
-        return str(self.chr) \
-        +"\t"+str(self.pos+prefix)  \
-        +"\t"+str(self.alingmentInfo['qSerialNo'])+"."+str(self.vid)    \
-        +"\t"+self.ref  \
-        +"\t"+self.alt  \
-        +"\t"+str(self.qual)    \
-        +"\t"+self.filter   \
-        +"\t"+"SubjectId="+self.subjectId   \
-        +";QueryId="+self.queryId.replace(';','&')  \
-        +";QueryLength="+str(self.alingmentInfo['qLen'])    \
-        +";QueryStart="+str(self.alingmentInfo['queryStart'])   \
-        +";QueryEnd="+str(self.alingmentInfo['queryEnd'])   \
-        +";SubjectLength="+str(self.alingmentInfo['sLen'])  \
-        +";SubjectStart="+str(self.alingmentInfo['subjectStart'])   \
-        +";SubjectEnd="+str(self.alingmentInfo['subjectEnd'])   \
-        +";Type="+self.type \
-        +";QPOS="+str(int(self.qpos)+int(qPrefix));
+        return self.chr+"\t"+str(self.pos+prefix)+"\t"+str(self.alingmentInfo['qSerialNo'])+"."+str(self.vid)+"\t"+self.ref+"\t"+self.alt+"\t"+str(self.qual)+"\t"+self.filter+"\t"+"SubjectId="+self.subjectId+";QueryId="+self.queryId.replace(';','&')+";QueryLength="+str(self.alingmentInfo['qLen'])+";QueryStart="+str(self.alingmentInfo['queryStart'])+";QueryEnd="+str(self.alingmentInfo['queryEnd'])+";SubjectLength="+str(self.alingmentInfo['sLen'])+";SubjectStart="+str(self.alingmentInfo['subjectStart'])+";SubjectEnd="+str(self.alingmentInfo['subjectEnd'])+";Type="+self.type+";QPOS="+str(self.qpos+qPrefix);
     @staticmethod
     def printHeader():
         return "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
